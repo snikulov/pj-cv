@@ -23,7 +23,7 @@ cv2.imshow('gray', gray)
 print("Detecting circles...")
 circles = cv2.HoughCircles(gray, cv2.cv.CV_HOUGH_GRADIENT, 2, 300,
 #        param1=100, param2=200, minRadius=200, maxRadius=500)
-        param1=100, param2=200, minRadius=200, maxRadius=400)
+        param1=50, param2=300, minRadius=200, maxRadius=350)
 print("Done...")
 
 if circles is not None:
@@ -32,7 +32,7 @@ if circles is not None:
     idx = 0
     for i in circles[0,:]:
         print("drawing image ... {0}", idx)
-        cv2.circle(output,(i[0],i[1]),i[2],(0,255,0),2)
+        cv2.circle(output,(i[0],i[1]),i[2]+20,(0,255,0),2)
         cv2.circle(output,(i[0],i[1]),2,(0,0,255),3)
         idx += 1
 else:
