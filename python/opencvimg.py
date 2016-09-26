@@ -18,14 +18,16 @@ gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 print("Bluring ...")
 #gray = cv2.medianBlur(gray, 5)
 gray = cv2.GaussianBlur(gray, (5,5), 1.5)
-cv2.imshow('original', img)
-cv2.imshow('gray', gray)
+#cv2.imshow('original', img)
+#cv2.imshow('gray', gray)
 print("Detecting circles...")
-circles = cv2.HoughCircles(gray, cv2.cv.CV_HOUGH_GRADIENT, 2, 300,
+
+circles = cv2.HoughCircles(gray, cv2.HOUGH_GRADIENT, 2, 300,
 #        param1=100, param2=200, minRadius=200, maxRadius=500)
         param1=50, param2=300, minRadius=200, maxRadius=350)
 print("Done...")
 
+head = "roi"
 if circles is not None:
     print("converting numbers...")
     circles = np.uint16(np.around(circles))
@@ -35,6 +37,9 @@ if circles is not None:
         cv2.circle(output,(i[0],i[1]),i[2]+20,(0,255,0),2)
         cv2.circle(output,(i[0],i[1]),2,(0,0,255),3)
         idx += 1
+#  roi - (y0, y1 : x0, x1)
+        roi = output[i[1]-(i[2]+100):i[1]+(i[2]+100), i[0]-(i[2]+100):i[0]+(i[2]+100)]
+        cv2.imshow(head + str(idx), roi)
 else:
     print("no circles detected")
 
