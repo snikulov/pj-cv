@@ -43,7 +43,7 @@ if circles is not None:
 else:
     print("no circles detected")
 
-cv2.imshow('detected', output)
+#cv2.imshow('detected', output)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
