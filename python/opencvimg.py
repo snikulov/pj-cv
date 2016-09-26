@@ -41,9 +41,9 @@ if circles is not None:
         roi = output[i[1]-(i[2]+100):i[1]+(i[2]+100), i[0]-(i[2]+100):i[0]+(i[2]+100)]
         cv2.imshow(head + str(idx), roi)
 else:
+    cv2.imshow('detected', output)
     print("no circles detected")
 
-#cv2.imshow('detected', output)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
