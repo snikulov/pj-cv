@@ -1,3 +1,6 @@
 [submodule "cpp/capture/ext/application"]
 	path = cpp/capture/ext/application
 	url = https://github.com/retf/Boost.Application.git
+[submodule "cpp/capture/ext/date"]
+	path = cpp/capture/ext/date
+	url = https://github.com/HowardHinnant/date.git

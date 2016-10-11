@@ -15,12 +15,17 @@ find_package(Boost 1.60.0 REQUIRED COMPONENTS
 include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(ext/application/include)
+include_directories(ext/date)
 include_directories(include)
 
 add_definitions(-DBOOST_APPLICATION_FEATURE_NS_SELECT_STD)
 add_definitions(-D_WIN32_WINNT=_WIN32_WINNT_WS08)
 
-add_executable(${PROJECT_NAME} src/main.cpp)
+set(HDR_FILES include/monitor_queue.hpp include/jpeg_writter.hpp include/opencv_frame.hpp)
+set(SRC_FILES src/main.cpp)
+
+add_executable(${PROJECT_NAME} ${HDR_FILES} ${SRC_FILES})
+
 target_link_libraries(${PROJECT_NAME}
     ${OpenCV_LIBS}
     ${Boost_LIBRARIES}
