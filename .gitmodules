@@ -1,0 +1,3 @@
+[submodule "cpp/capture/ext/application"]
+	path = cpp/capture/ext/application
+	url = https://github.com/retf/Boost.Application.git

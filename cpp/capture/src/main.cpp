@@ -1,63 +1,91 @@
 #include <iostream>
 #include <vector>
+#include <chrono>
+#include <thread>
+
 #include <opencv2/opencv.hpp>
+#include <boost/application.hpp>
+#include <boost/program_options.hpp>
 
-//using namespace cv;
+namespace app = boost::application;
+namespace po = boost::program_options;
 
-int main(int, char**)
+class capture
 {
-    cv::VideoCapture vcap;
-    cv::Mat image;
-    cv::Mat gray;
 
-    const std::string vsH264 = "rtsp://admin:admin@212.45.31.140:554/h264";
-    const std::string vsMJPEG = "rtsp://admin:admin@212.45.31.140:554/jpeg";
-    /* it may be an address of an mjpeg stream, 
-    e.g. "http://user:pass@cam_address:8081/cgi/mjpg/mjpg.cgi?.mjpg" */
-
-    //open the video stream and make sure it's opened
-    if (!vcap.open(vsH264))
+public:
+    capture(app::context& context, const std::string& url)
+        : context_(context)
+        , url_(url)
     {
-        std::cout << "Error opening video stream H.264, Trying MJPEG..." << std::endl;
-        if (!vcap.open(vsMJPEG))
-        {
-            std::cout << "Error opening video stream MJPEG... Exiting..." << std::endl;
-            return -1;
-        }
     }
 
-    //Create output window for displaying frames.
-    cv::namedWindow("Output Window", cv::WINDOW_KEEPRATIO | cv::WINDOW_NORMAL);
-
-    std::vector<cv::Vec3f> circles;
-
-    do
+    // param
+    int operator()()
     {
-        if (!vcap.read(image))
+        cv::VideoCapture vcap;
+        cv::Mat image;
+
+        //open the video stream and make sure it's opened
+        if (!vcap.open(url_))
         {
-            std::cout << "No frame" << std::endl;
+            std::cout << "Error opening video stream, using " << url_ << std::endl;
+            return -1;
         }
-        else
+
+        //Create output window for displaying frames.
+        cv::namedWindow("Output");
+
+        auto st = context_.find<app::status>();
+
+        int count = 0;
+        while (st->state() != app::status::stopped)
         {
-
-            // color to gray
-            cv::cvtColor(image, gray, cv::COLOR_BGR2GRAY);
- //           cv::GaussianBlur(gray, gray, {5, 5}, 1.5);
-            cv::GaussianBlur(gray, gray, { 9, 9 }, 2, 2);
-            circles.clear();
-            cv::HoughCircles(gray, circles, cv::HOUGH_GRADIENT, 2, gray.rows/4, 200, 100);
-
-            for (size_t i = 0; i < circles.size(); i++)
+            if (!vcap.read(image))
             {
-                cv::Point center{ cvRound(circles[i][0]), cvRound(circles[i][1]) };
-                int radius{ cvRound(circles[i][2]) };
-                // draw the circle center
-                circle(image, center, 3, cv::Scalar(0, 255, 0), -1, 8, 0);
-                // draw the circle outline
-                circle(image, center, radius, cv::Scalar(0, 0, 255), 3, 8, 0);
+                std::cout << "No frame " << ++count << std::endl;
             }
-
-            cv::imshow("Output Window", image);
+            else
+            {
+                cv::imshow("Output", image);
+            }
+            // 1 milliseconds - allow opencv to process it own events
+            (void)cv::waitKey(1);
         }
-    } while (cv::waitKey(1) < 0);
+        return 0;
+    }
+
+private:
+    app::context& context_;
+    std::string url_;
+};
+
+int main(int argc, char* argv[])
+{
+
+    std::string url;
+    po::options_description desc{ "Options" };
+    desc.add_options()("help,h", "Help screen")("url,u", po::value<std::string>(&url)->default_value("rtsp://admin:admin@212.45.31.140:554/h264"), "IP camera url");
+    po::variables_map vm;
+    po::store(po::parse_command_line(argc, argv, desc), vm);
+    po::notify(vm);
+
+    if (!vm.count("help"))
+    {
+        url = vm["url"].as<std::string>();
+
+        app::context app_context;
+        capture app(app_context, url);
+
+        app_context.insert<app::args>(
+            app::csbl::make_shared<app::args>(argc, argv));
+
+        std::cout << "Running capture on " << url
+                  << "\nDetected " << std::thread::hardware_concurrency() << " cores\n"
+                  << "Press Ctrl+C to exit ..." << std::endl;
+
+        return app::launch<app::common>(app, app_context);
+    }
+    std::cout << desc << "\n";
+    return EXIT_SUCCESS;
 }
