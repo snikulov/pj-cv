@@ -16,15 +16,16 @@ print("Converting to GrayScale...")
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 print("Bluring ...")
-#gray = cv2.medianBlur(gray, 5)
-gray = cv2.GaussianBlur(gray, (5,5), 1.5)
+gray = cv2.GaussianBlur(gray, (5,5), sigmaX=1.5, sigmaY=1.5)
+
 #cv2.imshow('original', img)
 #cv2.imshow('gray', gray)
 print("Detecting circles...")
 
-circles = cv2.HoughCircles(gray, cv2.HOUGH_GRADIENT, 2, 300,
-#        param1=100, param2=200, minRadius=200, maxRadius=500)
-        param1=50, param2=300, minRadius=200, maxRadius=350)
+heigth, width = gray.shape[:2]
+circles = cv2.HoughCircles(gray, method=cv2.HOUGH_GRADIENT, dp=2, minDist=300,
+        param1=50, param2=300, minRadius=350, maxRadius=650)
+
 print("Done...")
 
 head = "roi"

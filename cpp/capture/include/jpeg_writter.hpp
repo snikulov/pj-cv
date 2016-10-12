@@ -39,7 +39,7 @@ public:
                 {
                     if (write_image(data))
                     {
-                        std::cerr << "error writting image " << get_fname(data) << std::endl;
+                        std::cerr << "Writted image: " << get_fname(data) << std::endl;
                     }
                 }
             }
@@ -62,8 +62,8 @@ private:
         std::vector<cv::Vec3f> circles;
 
         cv::cvtColor(*(d.frame_), gray, cv::COLOR_BGR2GRAY);
-        cv::GaussianBlur(gray, gray, { 9, 9 }, 2, 2);
-        cv::HoughCircles(gray, circles, cv::HOUGH_GRADIENT, 2, gray.rows / 4, 200, 100);
+        cv::GaussianBlur(gray, gray, { 5, 5 }, 1.5, 1.5);
+        cv::HoughCircles(gray, circles, cv::HOUGH_GRADIENT, 2, 300, 50, 300, 350, 650);
 
         return !circles.empty();
     }
