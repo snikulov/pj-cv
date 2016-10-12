@@ -30,3 +30,6 @@ target_link_libraries(${PROJECT_NAME}
     ${OpenCV_LIBS}
     ${Boost_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT})
+if(WIN32)
+target_link_libraries(${PROJECT_NAME} Ws2_32)
+endif()

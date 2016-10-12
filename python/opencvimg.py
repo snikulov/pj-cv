@@ -39,7 +39,20 @@ if circles is not None:
         cv2.circle(output,(i[0],i[1]),2,(0,0,255),3)
         idx += 1
 #  roi - (y0, y1 : x0, x1)
-        roi = output[i[1]-(i[2]+100):i[1]+(i[2]+100), i[0]-(i[2]+100):i[0]+(i[2]+100)]
+        y0 = i[1]-(i[2]+100)
+        if y0 < 0:
+            y0 = 0
+        heigth, width = output.shape[:2]
+        y1 = i[1]+(i[2]+100)
+        if y1 > heigth:
+            y1 = heigth
+        x0 = i[0]-(i[2]+100)
+        if x0 < 0:
+            x0 = 0
+        x1 = i[0]+(i[2]+100)
+        if x1 > width:
+            x1 = width
+        roi = output[y0:y1, x0:x1]
         cv2.imshow(head + str(idx), roi)
 else:
     cv2.imshow('detected', output)
