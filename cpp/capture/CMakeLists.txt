@@ -21,7 +21,14 @@ include_directories(include)
 add_definitions(-DBOOST_APPLICATION_FEATURE_NS_SELECT_STD)
 add_definitions(-D_WIN32_WINNT=_WIN32_WINNT_WS08)
 
-set(HDR_FILES include/monitor_queue.hpp include/jpeg_writter.hpp include/opencv_frame.hpp)
+set(HDR_FILES
+    include/monitor_queue.hpp
+    include/jpeg_writter.hpp
+    include/opencv_frame.hpp
+    include/algo/od_interface.hpp
+    include/algo/hough_circles.hpp
+    include/algo/hog_dlib.hpp
+)
 set(SRC_FILES src/main.cpp)
 
 add_executable(${PROJECT_NAME} ${HDR_FILES} ${SRC_FILES})
