@@ -13,6 +13,9 @@
 #include "monitor_queue.hpp"
 #include "jpeg_writter.hpp"
 
+#include "algo/od_interface.hpp"
+#include "algo/hough_circles.hpp"
+
 namespace app = boost::application;
 namespace po  = boost::program_options;
 namespace fs  = boost::filesystem;
@@ -22,11 +25,13 @@ class capture : private boost::noncopyable
 
 public:
     capture(
-        app::context& context, const std::string& url, monitor_queue<data_t>& q, const fs::path& p)
+        app::context& context, const std::string& url, monitor_queue<data_t>& q, const fs::path& p,
+        const std::string& algo)
         : context_(context)
         , url_(url)
         , queue_(q)
         , img_path_(p)
+        , algo_(algo)
     {
     }
 
@@ -43,19 +48,30 @@ public:
             return -1;
         }
 
+        std::shared_ptr<od_interface> detector;
+
+        if (algo_ == "circles")
+        {
+            detector.reset(new hough_circles);
+        }
+        else if (algo_ == "hog")
+        {
+
+        }
+        else
+        {
+            std::cout << "Unknown algo " << algo_ << " Supported circles or hog" << std::endl;
+            return -1;
+        }
+
         // Create output window for displaying frames.
         cv::namedWindow("Output");
 
         auto st   = context_.find<app::status>();
         int count = 0;
 
-        std::vector<std::thread> tp;
-
-        for (int i = 0; i < 3; ++i)
-        {
-            auto worker = std::make_shared<jpeg_writter>(context_, img_path_, queue_);
-            tp.push_back(std::thread(*worker));
-        }
+        auto processor = std::make_shared<jpeg_writter>(context_, img_path_, queue_, detector);
+        std::thread wt{ *processor };
 
         while (st->state() != app::status::stopped)
         {
@@ -88,6 +104,8 @@ public:
             // 1 milliseconds - allow opencv to process it own events
             (void)cv::waitKey(1);
         }
+
+        wt.join();
         return 0;
     }
 
@@ -96,19 +114,22 @@ private:
     std::string url_;
     monitor_queue<data_t>& queue_;
     fs::path img_path_;
+    std::string algo_;
 };
 
 int main(int argc, char* argv[])
 {
     std::string url;
     std::string out_dir;
+    std::string algo;
 
     po::options_description desc{ "Options" };
     // clang-format off
     desc.add_options()
         ("help,h", "Help screen")
         ("url,u", po::value<std::string>(&url)->default_value("rtsp://admin:admin@212.45.31.140:554/h264"),"camera url")
-        ("out,o", po::value<std::string>(&out_dir)->default_value("images"), "output folder");
+        ("out,o", po::value<std::string>(&out_dir)->default_value("images"), "output folder")
+        ("algo, a", po::value<std::string>(&out_dir)->default_value("circles"), "detection algorithm[circles|hog]");
     // clang-format on
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -123,10 +144,12 @@ int main(int argc, char* argv[])
             fs::create_directory(outp);
         }
 
+        algo = vm["algo"].as<std::string>();
+
         app::context app_context;
         monitor_queue<data_t> frame_q;
 
-        capture app(app_context, url, frame_q, outp);
+        capture app(app_context, url, frame_q, outp, algo);
 
         app_context.insert<app::args>(app::csbl::make_shared<app::args>(argc, argv));
 

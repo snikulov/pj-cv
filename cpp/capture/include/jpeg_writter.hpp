@@ -12,15 +12,17 @@
 
 #include "opencv_frame.hpp"
 #include "monitor_queue.hpp"
+#include "algo/od_interface.hpp"
 
 class jpeg_writter
 {
 public:
     jpeg_writter(boost::application::context& ctx, const boost::filesystem::path& p,
-        monitor_queue<data_t>& q)
+        monitor_queue<data_t>& q, std::shared_ptr<od_interface> det)
         : context_(ctx)
         , path_(p)
         , queue_(q)
+        , detector_(det)
     {
     }
 
@@ -35,7 +37,7 @@ public:
             data = queue_.dequeue();
             if (data.frame_)
             {
-                if (is_circles(data))
+                if (detector_->has_objects(data))
                 {
                     if (write_image(data))
                     {
@@ -56,23 +58,12 @@ private:
         return cv::imwrite(f.string(), *(d.frame_));
     }
 
-    bool is_circles(const data_t& d)
-    {
-        cv::Mat gray;
-        std::vector<cv::Vec3f> circles;
-
-        cv::cvtColor(*(d.frame_), gray, cv::COLOR_BGR2GRAY);
-        cv::GaussianBlur(gray, gray, { 5, 5 }, 1.5, 1.5);
-        cv::HoughCircles(gray, circles, cv::HOUGH_GRADIENT, 2, 300, 50, 300, 350, 650);
-
-        return !circles.empty();
-    }
 
     std::string get_fname(const data_t& d)
     {
         using namespace date;
         std::ostringstream ss;
-        ss << std::this_thread::get_id() << "-" << d.time_captured_;
+        ss << d.time_captured_ << "-" << std::this_thread::get_id();
         std::string ret{ ss.str() };
 
         auto pred = [](char& ch) { return (ch == ' ' || ch == ':' || ch == '.' || ch == ','); };
@@ -84,6 +75,7 @@ private:
     boost::application::context& context_;
     boost::filesystem::path path_;
     monitor_queue<data_t>& queue_;
+    std::shared_ptr<od_interface> detector_;
 };
 
 #endif
