@@ -31,10 +31,16 @@ set(HDR_FILES
 )
 set(SRC_FILES src/main.cpp)
 
-add_executable(${PROJECT_NAME} ${HDR_FILES} ${SRC_FILES})
+# DLIB inclusion
+set(DLIB_JPEG_SUPPORT ON)
+set(USE_AVX_INSTRUCTIONS ON)
+add_subdirectory(ext/dlib)
 
+add_executable(${PROJECT_NAME} ${HDR_FILES} ${SRC_FILES})
+target_include_directories(${PROJECT_NAME} PUBLIC ext/dlib)
 target_link_libraries(${PROJECT_NAME}
     ${OpenCV_LIBS}
+    dlib
     ${Boost_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT})
 if(WIN32)
