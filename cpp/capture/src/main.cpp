@@ -7,7 +7,6 @@
 #include <boost/application.hpp>
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
-#include <boost/noncopyable.hpp>
 
 #include "opencv_frame.hpp"
 #include "monitor_queue.hpp"
@@ -21,7 +20,7 @@ namespace app = boost::application;
 namespace po  = boost::program_options;
 namespace fs  = boost::filesystem;
 
-class capture : private boost::noncopyable
+class capture
 {
 
 public:
@@ -36,6 +35,11 @@ public:
         , svm_path_(svm_path)
     {
     }
+
+    // no copy allowed
+    capture() = delete;
+    capture(const capture&) = delete;
+    capture& operator=(const capture&) = delete;
 
     // param
     int operator()()
@@ -141,8 +145,8 @@ int main(int argc, char* argv[])
         ("help,h", "Help screen")
         ("url,u", po::value<std::string>(&url)->default_value("rtsp://admin:admin@212.45.31.140:554/h264"), "camera url")
         ("out,o", po::value<std::string>(&out_dir)->default_value("images"), "output folder")
-        ("algo, a", po::value<std::string>(&out_dir)->default_value("circles"), "detection algorithm[circles|hog]")
-        ("svmpath, s", po::value<std::string>(&out_dir)->default_value("object_detector.svm"), "path to obj detector svm")
+        ("algo,a", po::value<std::string>(&out_dir)->default_value("circles"), "detection algorithm[circles|hog]")
+        ("svmpath,s", po::value<std::string>(&out_dir)->default_value("object_detector.svm"), "path to obj detector svm")
         ;
     // clang-format on
     po::variables_map vm;
