@@ -25,22 +25,30 @@ set(HDR_FILES
     include/monitor_queue.hpp
     include/jpeg_writter.hpp
     include/opencv_frame.hpp
+    include/algorithm_factory.hpp
     include/algo/od_interface.hpp
     include/algo/hough_circles.hpp
     include/algo/hog_dlib.hpp
 )
-set(SRC_FILES src/main.cpp)
+set(SRC_FILES
+    src/algorithm_factory.cpp
+    src/main.cpp)
 
 # DLIB inclusion
 set(DLIB_JPEG_SUPPORT ON)
 set(USE_AVX_INSTRUCTIONS ON)
 add_subdirectory(ext/dlib)
 
+set(LOG4CPLUS_BUILD_TESTING OFF)
+set(LOG4CPLUS_BUILD_LOGGINGSERVER OFF)
+add_subdirectory(ext/log4cplus)
+
 add_executable(${PROJECT_NAME} ${HDR_FILES} ${SRC_FILES})
 target_include_directories(${PROJECT_NAME} PUBLIC ext/dlib)
 target_link_libraries(${PROJECT_NAME}
     ${OpenCV_LIBS}
     dlib
+    log4cplus
     ${Boost_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT})
 if(WIN32)

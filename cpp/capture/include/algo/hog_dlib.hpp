@@ -1,17 +1,16 @@
 #ifndef HOG_DLIB_HPP__
 #define HOG_DLIB_HPP__
 
-
 #include "algo/od_interface.hpp"
 
-#include <dlib/opencv/cv_image.h> 
+#include <dlib/opencv/cv_image.h>
 #include <dlib/svm_threaded.h>
 #include <dlib/image_processing.h>
 #include <dlib/data_io.h>
 #include <dlib/gui_widgets.h>
 #include <date.h>
 
-using img_scanner_t = dlib::scan_fhog_pyramid<dlib::pyramid_down<6>>;
+using img_scanner_t = dlib::scan_fhog_pyramid<dlib::pyramid_down<6> >;
 
 class hog : public od_interface
 {
@@ -39,5 +38,4 @@ private:
     std::string svm_path_;
 };
 
-#endif  // HOG_DLIB_HPP__
-                                    
+#endif // HOG_DLIB_HPP__

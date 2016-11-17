@@ -6,9 +6,10 @@
 class od_interface
 {
 public:
-     virtual bool has_objects(data_t&) = 0;
-     virtual ~od_interface() {}
+    virtual bool has_objects(data_t&) = 0;
+    virtual ~od_interface()
+    {
+    }
 };
 
-#endif  // OD_INTERFACE_HPP__
-                                    
+#endif // OD_INTERFACE_HPP__

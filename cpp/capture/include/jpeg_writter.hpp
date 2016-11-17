@@ -18,7 +18,7 @@ class jpeg_writter
 {
 public:
     jpeg_writter(boost::application::context& ctx, const boost::filesystem::path& p,
-        monitor_queue<data_t>& q, std::shared_ptr<od_interface> det)
+                 monitor_queue<data_t>& q, std::shared_ptr<od_interface> det)
         : context_(ctx)
         , path_(p)
         , queue_(q)
@@ -58,7 +58,6 @@ private:
         return cv::imwrite(f.string(), *(d.frame_));
     }
 
-
     std::string get_fname(const data_t& d)
     {
         using namespace date;
@@ -66,7 +65,8 @@ private:
         ss << d.time_captured_ << "-" << std::this_thread::get_id();
         std::string ret{ ss.str() };
 
-        auto pred = [](char& ch) { return (ch == ' ' || ch == ':' || ch == '.' || ch == ','); };
+        auto pred = [](char& ch)
+        { return (ch == ' ' || ch == ':' || ch == '.' || ch == ','); };
         std::replace_if(ret.begin(), ret.end(), pred, '-');
         ret += ".jpg";
         return ret;
