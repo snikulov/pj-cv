@@ -13,3 +13,6 @@
 [submodule "cpp/capture/ext/dlib"]
 	path = cpp/capture/ext/dlib
 	url = https://github.com/snikulov/dlib.git
+[submodule "cpp/capture/ext/log4cplus"]
+	path = cpp/capture/ext/log4cplus
+	url = https://github.com/log4cplus/log4cplus.git
