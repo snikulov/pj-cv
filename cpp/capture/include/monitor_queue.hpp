@@ -12,7 +12,8 @@
 
 #include <boost/noncopyable.hpp>
 
-template <typename T> class monitor_queue : private boost::noncopyable
+template <typename T>
+class monitor_queue : private boost::noncopyable
 {
 public:
     monitor_queue(std::size_t max_size = 100)

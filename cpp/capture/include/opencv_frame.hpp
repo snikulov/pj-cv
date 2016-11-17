@@ -7,11 +7,14 @@
 namespace cv
 {
 class Mat;
-} /* namespace cv */
+} // namespace cv
 
 struct data_t
 {
+    /// time, when frame captured
     std::chrono::system_clock::time_point time_captured_;
+
+    /// frame with image data
     std::shared_ptr<cv::Mat> frame_;
 };
 
