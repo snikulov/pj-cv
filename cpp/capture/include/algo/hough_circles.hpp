@@ -16,7 +16,13 @@ public:
         cv::GaussianBlur(gray, gray, { 5, 5 }, 1.5, 1.5);
         cv::HoughCircles(gray, circles, cv::HOUGH_GRADIENT, 2, 300, 50, 300, 350, 650);
 
-        return !circles.empty();
+        if (!circles.empty())
+        {
+            d.circles_.reset(new std::vector<cv::Vec3f>());
+            std::swap(*(d.circles_), circles);
+            return true;
+        }
+        return false;
     }
 
     opencv_frame_t operator()(opencv_frame_t d)

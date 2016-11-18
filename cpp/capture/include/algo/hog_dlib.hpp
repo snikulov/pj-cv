@@ -29,8 +29,17 @@ public:
     {
         cv::Mat tmp = *d.frame_;
         dlib::cv_image<dlib::bgr_pixel> cimg(tmp);
-        std::vector<dlib::rectangle> dets = (*detector_)(cimg);
-        return !dets.empty();
+        std::vector<dlib::rectangle> dets{ (*detector_)(cimg) };
+        if (!dets.empty())
+        {
+            d.squares_.reset(new std::vector<cv::Rect>(dets.size()));
+            for (const auto& r : dets)
+            {
+                d.squares_->push_back(dlib_to_ocv(r));
+            }
+            return true;
+        }
+        return false;
     }
 
     opencv_frame_t operator()(opencv_frame_t d)
@@ -44,6 +53,11 @@ public:
     }
 
 private:
+    cv::Rect dlib_to_ocv(const dlib::rectangle& r)
+    {
+        return cv::Rect(cv::Point2i(r.left(), r.top()), cv::Point2i(r.right() + 1, r.bottom() + 1));
+    }
+
     std::unique_ptr<dlib::object_detector<img_scanner_t> > detector_;
     std::string svm_path_;
 };

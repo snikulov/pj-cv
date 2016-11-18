@@ -3,11 +3,7 @@
 
 #include <memory>
 #include <chrono>
-
-namespace cv
-{
-class Mat;
-} // namespace cv
+#include <opencv2/opencv.hpp>
 
 struct opencv_frame_t
 {
@@ -16,6 +12,10 @@ struct opencv_frame_t
 
     /// frame with image data
     std::shared_ptr<cv::Mat> frame_;
+
+    /// opencv Circles found
+    std::shared_ptr<std::vector<cv::Vec3f> > circles_;
+    std::shared_ptr<std::vector<cv::Rect> > squares_;
 };
 
 #endif
