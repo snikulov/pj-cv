@@ -23,7 +23,14 @@ public:
     {
         if (d.frame_ && !d.frame_->empty())
         {
-            write_image(d);
+            if (d.squares_ && !(d.squares_->empty()))
+            {
+                // detected image
+                if (write_image(d))
+                {
+                    std::cerr << "Writted image: " << get_fname(d) << std::endl;
+                }
+            }
         }
     }
 

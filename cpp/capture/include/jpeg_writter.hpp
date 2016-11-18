@@ -26,14 +26,6 @@ public:
     {
     }
 
-    void operator()(opencv_frame_t d)
-    {
-        if (d.frame_ && !d.frame_->empty())
-        {
-            write_image(d);
-        }
-    }
-
     void operator()()
     {
         auto st = context_.find<boost::application::status>();

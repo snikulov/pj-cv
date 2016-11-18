@@ -47,7 +47,11 @@ public:
         opencv_frame_t tmp = d;
         if (tmp.frame_ && !tmp.frame_->empty())
         {
-            (void)has_objects(tmp);
+            // prev step found circles
+            if (tmp.circles_ && !(tmp.circles_->empty()))
+            {
+                (void)has_objects(tmp);
+            }
         }
         return tmp;
     }
