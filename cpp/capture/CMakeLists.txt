@@ -24,6 +24,7 @@ add_definitions(-D_WIN32_WINNT=_WIN32_WINNT_WS08)
 set(HDR_FILES
     include/monitor_queue.hpp
     include/jpeg_writter.hpp
+    include/jpeg_writter_ex.hpp
     include/opencv_frame.hpp
     include/algorithm_factory.hpp
     include/algo/od_interface.hpp
@@ -31,10 +32,10 @@ set(HDR_FILES
     include/algo/hog_dlib.hpp
     include/pipe/filter.hpp
     include/pipe/pipeline.hpp
+    include/pipe/producer.hpp
 )
 set(SRC_FILES
     src/algorithm_factory.cpp
-    src/pipeline.cpp
     src/main.cpp)
 
 # DLIB inclusion
@@ -45,6 +46,18 @@ add_subdirectory(ext/dlib)
 set(LOG4CPLUS_BUILD_TESTING OFF)
 set(LOG4CPLUS_BUILD_LOGGINGSERVER OFF)
 add_subdirectory(ext/log4cplus)
+
+add_executable(pipeline src/pipeline.cpp)
+target_include_directories(pipeline PUBLIC ext/dlib)
+target_link_libraries(pipeline
+    ${OpenCV_LIBS}
+    dlib
+    log4cplus
+    ${Boost_LIBRARIES}
+    ${CMAKE_THREAD_LIBS_INIT})
+if(WIN32)
+target_link_libraries(pipeline Ws2_32)
+endif()
 
 add_executable(${PROJECT_NAME} ${HDR_FILES} ${SRC_FILES})
 target_include_directories(${PROJECT_NAME} PUBLIC ext/dlib)

@@ -27,7 +27,7 @@ class capture
 
 public:
     capture(app::context& context, const std::string& url,
-            monitor_queue<data_t>& q, const fs::path& p,
+            monitor_queue<opencv_frame_t>& q, const fs::path& p,
             std::shared_ptr<od_interface> obj_detector,
             bool video)
         : context_(context)
@@ -52,7 +52,7 @@ public:
     int operator()()
     {
         cv::VideoCapture vcap;
-        data_t frame;
+        opencv_frame_t frame;
 
         // open the video stream and make sure it's opened
         if (!vcap.open(url_))
@@ -113,7 +113,7 @@ public:
 private:
     app::context& context_;
     std::string url_;
-    monitor_queue<data_t>& queue_;
+    monitor_queue<opencv_frame_t>& queue_;
     fs::path img_path_;
     std::shared_ptr<od_interface> obj_detector_;
     bool sho_cap_;
@@ -142,7 +142,7 @@ int main(int argc, char* argv[])
         }
 
         app::context app_context;
-        monitor_queue<data_t> frame_q;
+        monitor_queue<opencv_frame_t> frame_q;
 
         capture app(app_context, url, frame_q, outp, algorithm_factory::create_object_detector(vm), vm["video"].as<bool>());
 

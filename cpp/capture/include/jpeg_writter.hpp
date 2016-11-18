@@ -18,7 +18,7 @@ class jpeg_writter
 {
 public:
     jpeg_writter(boost::application::context& ctx, const boost::filesystem::path& p,
-                 monitor_queue<data_t>& q, std::shared_ptr<od_interface> det)
+                 monitor_queue<opencv_frame_t>& q, std::shared_ptr<od_interface> det)
         : context_(ctx)
         , path_(p)
         , queue_(q)
@@ -26,11 +26,19 @@ public:
     {
     }
 
+    void operator()(opencv_frame_t d)
+    {
+        if (d.frame_ && !d.frame_->empty())
+        {
+            write_image(d);
+        }
+    }
+
     void operator()()
     {
         auto st = context_.find<boost::application::status>();
 
-        data_t data;
+        opencv_frame_t data;
 
         while (st->state() != boost::application::status::stopped)
         {
@@ -51,14 +59,14 @@ public:
 private:
     jpeg_writter() = delete;
 
-    bool write_image(const data_t& d)
+    bool write_image(const opencv_frame_t& d)
     {
         boost::filesystem::path f{ path_ };
         f /= get_fname(d);
         return cv::imwrite(f.string(), *(d.frame_));
     }
 
-    std::string get_fname(const data_t& d)
+    std::string get_fname(const opencv_frame_t& d)
     {
         using namespace date;
         std::ostringstream ss;
@@ -74,7 +82,7 @@ private:
 
     boost::application::context& context_;
     boost::filesystem::path path_;
-    monitor_queue<data_t>& queue_;
+    monitor_queue<opencv_frame_t>& queue_;
     std::shared_ptr<od_interface> detector_;
 };
 

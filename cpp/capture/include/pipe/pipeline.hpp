@@ -5,27 +5,82 @@
 #include <memory>
 #include <thread>
 
-class filter;
+#include "producer.hpp"
 
+template <class T>
 class pipeline
 {
 public:
-    pipeline();
+    pipeline()
+        : is_running_(false)
+    {
+    }
 
-    ~pipeline();
+    ~pipeline()
+    {
+        if (is_running_)
+        {
+            for (auto& elm : tgroup_)
+            {
+                elm->join();
+            }
+        }
+    }
 
-    void add_filter(filter& f);
+    void add_filter(T f)
+    {
+        if (!filters_.empty())
+        {
+            T& prev_step = filters_.back();
+            f->set_prev(prev_step);
+        }
+        filters_.push_back(f);
+    }
 
-    bool run();
+    bool run()
+    {
+        if ((!is_running_) && (!filters_.empty()))
+        {
+            for (auto it = filters_.rbegin(); it != filters_.rend(); ++it)
+            {
+
+                //tgroup_.push_back(std::make_shared<std::thread>(std::ref(*it)));
+
+                // some magic
+                auto elm = *it;
+                auto prodptr = dynamic_cast<producer<T>*>(elm.get());
+                if (prodptr)
+                {
+                    tgroup_.push_back(std::make_shared<std::thread>(std::ref(*prodptr)));
+                }
+                else
+                {
+                    auto transptr = dynamic_cast<transformer<T>*>(elm.get());
+                    if (transptr)
+                    {
+                        tgroup_.push_back(std::make_shared<std::thread>(std::ref(*transptr)));
+                    }
+                    else
+                    {
+                        auto finptr = dynamic_cast<sink<T>*>(elm.get());
+                        if (finptr)
+                        {
+                            tgroup_.push_back(std::make_shared<std::thread>(std::ref(*finptr)));
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     /// no copy
     pipeline(const pipeline&) = delete;
     pipeline& operator=(const pipeline&) = delete;
 
 private:
-    std::list<std::shared_ptr<filter> > pstore_;
+    std::list<T> filters_;
     bool is_running_;
-    std::list<std::thread> tgroup_;
+    std::list<std::shared_ptr<std::thread> > tgroup_;
 };
 
 #endif // PIPELINE_HPP__

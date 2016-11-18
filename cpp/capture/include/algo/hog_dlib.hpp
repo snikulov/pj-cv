@@ -25,12 +25,22 @@ public:
         std::cout << std::chrono::system_clock::now() << " finished loading" << std::endl;
     }
 
-    bool has_objects(data_t& d)
+    bool has_objects(opencv_frame_t& d)
     {
         cv::Mat tmp = *d.frame_;
         dlib::cv_image<dlib::bgr_pixel> cimg(tmp);
         std::vector<dlib::rectangle> dets = (*detector_)(cimg);
         return !dets.empty();
+    }
+
+    opencv_frame_t operator()(opencv_frame_t d)
+    {
+        opencv_frame_t tmp = d;
+        if (tmp.frame_ && !tmp.frame_->empty())
+        {
+            (void)has_objects(tmp);
+        }
+        return tmp;
     }
 
 private:
