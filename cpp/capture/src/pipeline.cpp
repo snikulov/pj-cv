@@ -10,8 +10,18 @@
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
 
+#include <log4cplus/logger.h>
+#include <log4cplus/loggingmacros.h>
+#include <log4cplus/fileappender.h>
+#include <log4cplus/loglevel.h>
+#include <log4cplus/configurator.h>
+
 namespace app = boost::application;
 namespace fs = boost::filesystem;
+
+using namespace log4cplus;
+using namespace log4cplus::helpers;
+
 
 class ocv_cam
 {
@@ -116,6 +126,17 @@ private:
 
 static void init_logger()
 {
+    using namespace log4cplus;
+    using namespace log4cplus::helpers;
+    try
+    {
+        PropertyConfigurator::doConfigure("log4cplus.properties");
+    }
+    catch (const std::exception& ex)
+    {
+        std::cerr << ex.what() << std::endl;
+        exit(0);
+    }
 
 }
 
@@ -123,13 +144,16 @@ int main(int argc, char** argv)
 {
     init_logger();
 
+    auto lg = Logger::getInstance("main");
+    LOG4CPLUS_INFO(lg, "pipeline v0.1");
+    LOG4CPLUS_INFO(lg, "Running on " << std::thread::hardware_concurrency() << " HW cores");
+    LOG4CPLUS_INFO(lg, "Press <Ctrl+C> to exit...");
+
     app::context app_context;
     app_context.insert<app::args>(
         app::csbl::make_shared<app::args>(argc, argv));
 
     worker app(app_context);
-    std::cout << "\nRunning on " << std::thread::hardware_concurrency()
-              << " cores\n Press Ctrl+C to exit ..." << std::endl;
 
     return app::launch<app::common>(app, app_context);
 

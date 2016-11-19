@@ -99,3 +99,8 @@ target_link_libraries(${PROJECT_NAME}
 if(WIN32)
     target_link_libraries(${PROJECT_NAME} Ws2_32)
 endif()
+
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND
+    ${CMAKE_COMMAND} -E copy_directory "${DEPS_ROOT}/bin" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/"
+    VERBATIM)
