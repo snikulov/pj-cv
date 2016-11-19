@@ -16,7 +16,7 @@ template <typename T>
 class monitor_queue : private boost::noncopyable
 {
 public:
-    monitor_queue(std::size_t max_size = 100)
+    monitor_queue(std::size_t max_size = 500)
         : max_size_(max_size)
     {
     }
@@ -33,7 +33,7 @@ public:
         cond_.notify_all();
     }
 
-    T dequeue(int ms_delay = 500)
+    T dequeue(int ms_delay = 1000)
     {
         std::unique_lock<std::mutex> lk(mx_);
         if (q_.empty())

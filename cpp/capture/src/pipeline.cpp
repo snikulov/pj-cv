@@ -11,6 +11,7 @@
 #include <boost/filesystem.hpp>
 
 namespace app = boost::application;
+namespace fs = boost::filesystem;
 
 class ocv_cam
 {
@@ -76,17 +77,25 @@ public:
             return (ctx_.find<app::status>())->state() == app::status::stopped;
         };
 
+        auto frame_not_null = [](const opencv_frame_t& data) -> bool {
+            return data.frame_ && (!data.frame_->empty());
+        };
+
         pipeline<std::shared_ptr<filter<opencv_frame_t> > > pipe;
-        auto prod = std::make_shared<producer<opencv_frame_t> >(std::ref(*cam), is_stopped);
+        auto prod = std::make_shared<producer<opencv_frame_t> >(std::ref(*cam), frame_not_null, is_stopped);
         pipe.add_filter(prod);
 
+        auto circles_found = [frame_not_null](const opencv_frame_t& data) -> bool {
+            return frame_not_null(data) && data.circles_ && (!data.circles_->empty());
+        };
+
         auto circ = std::make_shared<hough_circles>();
-        auto step1 = std::make_shared<transformer<opencv_frame_t> >(std::ref(*circ), is_stopped);
+        auto step1 = std::make_shared<transformer<opencv_frame_t> >(std::ref(*circ), circles_found, is_stopped);
         pipe.add_filter(step1);
 
         std::string svmpath = "tr2_80x80.svm";
         auto h = std::make_shared<hog>(svmpath);
-        auto step2 = std::make_shared<transformer<opencv_frame_t> >(std::ref(*h), is_stopped);
+        auto step2 = std::make_shared<transformer<opencv_frame_t> >(std::ref(*h), circles_found, is_stopped);
         pipe.add_filter(step2);
 
         std::string imgpath = "images";
@@ -105,8 +114,15 @@ private:
     app::context& ctx_;
 };
 
+static void init_logger()
+{
+
+}
+
 int main(int argc, char** argv)
 {
+    init_logger();
+
     app::context app_context;
     app_context.insert<app::args>(
         app::csbl::make_shared<app::args>(argc, argv));

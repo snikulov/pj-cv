@@ -5,6 +5,19 @@ project(${PROJECT_NAME})
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
+
+include(ExtProjectUtils)
+
+# set output dir for binary
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+set(TARGET_WINNT 0x0600)
+
+set(DEPS_ROOT "${CMAKE_BINARY_DIR}/deps")
+
 set(Boost_USE_STATIC_LIBS ON)
 
 find_package(Threads REQUIRED)
@@ -12,11 +25,17 @@ find_package(OpenCV REQUIRED)
 find_package(Boost 1.60.0 REQUIRED COMPONENTS
     thread system date_time chrono regex filesystem atomic program_options)
 
+ExtProjectGit("https://github.com/log4cplus/log4cplus.git" "REL_1_2_0" ${DEPS_ROOT}
+    CMAKE_ARGS -DBUILD_SHARED_LIBS=ON -DUNICODE=OFF -DLOG4CPLUS_BUILD_LOGGINGSERVER=OFF -DLOG4CPLUS_BUILD_TESTING=OFF -D_WIN32_WINNT=${TARGET_WINNT})
+
 include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(ext/application/include)
 include_directories(ext/date)
 include_directories(include)
+include_directories(${DEPS_ROOT}/include)
+
+link_directories(${DEPS_ROOT}/lib)
 
 add_definitions(-DBOOST_APPLICATION_FEATURE_NS_SELECT_STD)
 if(WIN32)
@@ -52,29 +71,31 @@ add_subdirectory(ext/dlib)
 #add_subdirectory(ext/log4cplus)
 
 add_executable(pipeline src/pipeline.cpp)
+add_dependencies(pipeline log4cplus.git)
 target_include_directories(pipeline PUBLIC ext/dlib)
 target_link_libraries(pipeline
     ${OpenCV_LIBS}
     dlib
     ${Boost_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT})
-#target_link_libraries(pipeline
-#    debug log4cplusD
-#    optimized log4cplus)
+target_link_libraries(pipeline
+    debug log4cplusD
+    optimized log4cplus)
 if(WIN32)
     target_link_libraries(pipeline Ws2_32)
 endif()
 
 add_executable(${PROJECT_NAME} ${HDR_FILES} ${SRC_FILES})
+add_dependencies(${PROJECT_NAME} log4cplus.git)
 target_include_directories(${PROJECT_NAME} PUBLIC ext/dlib)
 target_link_libraries(${PROJECT_NAME}
     ${OpenCV_LIBS}
     dlib
     ${Boost_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT})
-#target_link_libraries(${PROJECT_NAME}
-#    debug log4cplusD
-#    optimized log4cplus)
+target_link_libraries(${PROJECT_NAME}
+    debug log4cplusD
+    optimized log4cplus)
 if(WIN32)
     target_link_libraries(${PROJECT_NAME} Ws2_32)
 endif()

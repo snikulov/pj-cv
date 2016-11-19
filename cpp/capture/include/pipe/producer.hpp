@@ -43,8 +43,9 @@ template <class T>
 class producer : public filter<T>
 {
 public:
-    producer(std::function<T()> f, std::function<bool()> s)
+    producer(std::function<T(void)> f, std::function<bool(const T&)> pred, std::function<bool(void)> s)
         : func_(f)
+        , pred_(pred)
         , stop_(s)
     {
     }
@@ -53,20 +54,27 @@ public:
     {
         while (!stop_())
         {
-            this->put(func_());
+            T d{ func_() };
+            // will go further only if condition pass
+            if (pred_(d))
+            {
+                put(d);
+            }
         }
     }
 
-    std::function<T()> func_;
-    std::function<bool()> stop_;
+    std::function<T(void)> func_;
+    std::function<bool(const T&)> pred_;
+    std::function<bool(void)> stop_;
 };
 
 template <class T>
 class transformer : public filter<T>
 {
 public:
-    transformer(std::function<T(T)> f, std::function<bool()> s)
+    transformer(std::function<T(T)> f, std::function<bool(const T&)> pred, std::function<bool(void)> s)
         : func_(f)
+        , pred_(pred)
         , stop_(s)
     {
     }
@@ -75,19 +83,25 @@ public:
     {
         while (!stop_())
         {
-            this->put(func_(this->get()));
+            T d{ func_(get()) };
+            // will go further, only if condition pass
+            if (pred_(d))
+            {
+                put(d);
+            }
         }
     }
 
     std::function<T(T)> func_;
-    std::function<bool()> stop_;
+    std::function<bool(const T&)> pred_;
+    std::function<bool(void)> stop_;
 };
 
 template <class T>
 class sink : public filter<T>
 {
 public:
-    sink(std::function<void(T)> f, std::function<bool()> s)
+    sink(std::function<void(T)> f, std::function<bool(void)> s)
         : func_(f)
         , stop_(s)
     {
@@ -102,7 +116,7 @@ public:
     }
 
     std::function<void(T)> func_;
-    std::function<bool()> stop_;
+    std::function<bool(void)> stop_;
 };
 
 #endif // PRODUCER_HPP__
