@@ -19,8 +19,10 @@ include_directories(ext/date)
 include_directories(include)
 
 add_definitions(-DBOOST_APPLICATION_FEATURE_NS_SELECT_STD)
-add_definitions(-D_WIN32_WINNT=_WIN32_WINNT_WS08)
-
+if(WIN32)
+    add_definitions(-DWIN32_LEAN_AND_MEAN)
+    add_definitions(-D_WIN32_WINNT=0x0600)
+endif()
 set(HDR_FILES
     include/monitor_queue.hpp
     include/jpeg_writter.hpp
@@ -33,7 +35,7 @@ set(HDR_FILES
     include/pipe/filter.hpp
     include/pipe/pipeline.hpp
     include/pipe/producer.hpp
-)
+    )
 set(SRC_FILES
     src/algorithm_factory.cpp
     src/main.cpp)
@@ -43,20 +45,24 @@ set(DLIB_JPEG_SUPPORT ON)
 set(USE_AVX_INSTRUCTIONS ON)
 add_subdirectory(ext/dlib)
 
-set(LOG4CPLUS_BUILD_TESTING OFF)
-set(LOG4CPLUS_BUILD_LOGGINGSERVER OFF)
-add_subdirectory(ext/log4cplus)
+#set(LOG4CPLUS_BUILD_TESTING OFF)
+#set(LOG4CPLUS_BUILD_LOGGINGSERVER OFF)
+#set(UNICODE OFF)
+#set(LOG4CPLUS_HAVE_CXX11_SUPPORT ON)
+#add_subdirectory(ext/log4cplus)
 
 add_executable(pipeline src/pipeline.cpp)
 target_include_directories(pipeline PUBLIC ext/dlib)
 target_link_libraries(pipeline
     ${OpenCV_LIBS}
     dlib
-    log4cplus
     ${Boost_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT})
+#target_link_libraries(pipeline
+#    debug log4cplusD
+#    optimized log4cplus)
 if(WIN32)
-target_link_libraries(pipeline Ws2_32)
+    target_link_libraries(pipeline Ws2_32)
 endif()
 
 add_executable(${PROJECT_NAME} ${HDR_FILES} ${SRC_FILES})
@@ -64,9 +70,11 @@ target_include_directories(${PROJECT_NAME} PUBLIC ext/dlib)
 target_link_libraries(${PROJECT_NAME}
     ${OpenCV_LIBS}
     dlib
-    log4cplus
     ${Boost_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT})
+#target_link_libraries(${PROJECT_NAME}
+#    debug log4cplusD
+#    optimized log4cplus)
 if(WIN32)
-target_link_libraries(${PROJECT_NAME} Ws2_32)
+    target_link_libraries(${PROJECT_NAME} Ws2_32)
 endif()

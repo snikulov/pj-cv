@@ -41,13 +41,15 @@ public:
     {
         if ((!is_running_) && (!filters_.empty()))
         {
+            is_running_ = true;
             for (auto it = filters_.rbegin(); it != filters_.rend(); ++it)
             {
 
-                //tgroup_.push_back(std::make_shared<std::thread>(std::ref(*it)));
-
-                // some magic
                 auto elm = *it;
+                tgroup_.push_back(std::make_shared<std::thread>(std::ref(*elm)));
+#if 0
+                // some magic
+                
                 auto prodptr = dynamic_cast<producer<T>*>(elm.get());
                 if (prodptr)
                 {
@@ -67,10 +69,16 @@ public:
                         {
                             tgroup_.push_back(std::make_shared<std::thread>(std::ref(*finptr)));
                         }
+                        else
+                        {
+                            throw std::runtime_error("Unable cast to filter!");
+                        }
                     }
                 }
+#endif
             }
         }
+        return is_running_;
     }
 
     /// no copy

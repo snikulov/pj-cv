@@ -22,7 +22,11 @@ public:
 
     T get()
     {
-        return q_.dequeue();
+        if (parent_)
+        {
+            return parent_->get();
+        }
+        return T();
     }
 
     void put(T t)
