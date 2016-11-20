@@ -12,12 +12,23 @@
 
 #include <boost/noncopyable.hpp>
 
+#include <log4cplus/logger.h>
+#include <log4cplus/loggingmacros.h>
+#include <log4cplus/fileappender.h>
+#include <log4cplus/loglevel.h>
+#include <log4cplus/configurator.h>
+
+
+using namespace log4cplus;
+using namespace log4cplus::helpers;
+
 template <typename T>
 class monitor_queue : private boost::noncopyable
 {
 public:
-    monitor_queue(std::size_t max_size = 500)
+    monitor_queue(std::size_t max_size = 1000)
         : max_size_(max_size)
+        , lg_(Logger::getInstance("monitorq"))
     {
     }
 
@@ -26,6 +37,7 @@ public:
         std::lock_guard<std::mutex> lock(mx_);
         if (q_.size() >= max_size_)
         {
+            LOG4CPLUS_WARN(lg_, "Queue max size exceeded");
             // drop frame
             q_.pop();
         }
@@ -71,5 +83,7 @@ private:
     std::mutex mx_;
     std::condition_variable cond_;
     std::queue<T> q_;
+
+    log4cplus::Logger lg_;
 };
 #endif

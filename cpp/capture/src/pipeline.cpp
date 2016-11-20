@@ -30,45 +30,85 @@ public:
         : url_(url)
         , cap_(new cv::VideoCapture)
         , err_count_(0)
+        , clog_(Logger::getInstance("camera"))
+        , frames_count_(0)
+        , start_time_(std::chrono::high_resolution_clock::now())
+        , fps_(0.0)
     {
         if (!cap_->open(url_))
         {
+            LOG4CPLUS_FATAL(clog_, "Unable to open " << url_);
             throw std::runtime_error("Unable to open " + url_);
         }
+        LOG4CPLUS_INFO(clog_, "Running capture on: " << url_);
     }
 
     opencv_frame_t operator()()
     {
-        opencv_frame_t frame;
+        opencv_frame_t frame{};
         frame.frame_ = std::make_shared<cv::Mat>();
         if (!cap_->read(*(frame.frame_)))
         {
             err_count_++;
             if (err_count_ > 10)
             {
+                LOG4CPLUS_WARN(clog_, "Number of empty frames " << err_count_ << ". Try re-open");
                 cap_.reset(new cv::VideoCapture());
                 if (!cap_->open(url_))
                 {
+                    LOG4CPLUS_FATAL(clog_, "Unable to re-open " << url_ << " after " << err_count_ << " retries");
                     throw std::runtime_error("Unable to open " + url_);
                 }
                 else
                 {
-                    err_count_ = 0;
+                    err_count_    = 0;
+                    frames_count_ = 0;
+                    LOG4CPLUS_INFO(clog_, "Re-opened capture...");
                 }
             }
         }
         else
         {
+            frame.time_captured_ = std::chrono::system_clock::now();
             err_count_ = 0;
+            frames_count_++;
+
+            if (!(frames_count_ % 25)) {
+                auto diff = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - start_time_);
+                auto cnt = diff.count();
+                if (cnt > 0 && !(cnt % 5))
+                {
+                    LOG4CPLUS_INFO(clog_, "frames received: " << frames_count_);
+                }
+            }
         }
-        frame.time_captured_ = std::chrono::system_clock::now();
         return frame;
     }
 
 private:
+
+    void update_fps()
+    {
+        using namespace std::chrono_literals;
+        auto diff = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - start_time_);
+
+        if (diff > 2s)
+        {
+            fps_ = frames_count_ / diff.count();
+        }
+    }
+
     std::string url_;
     std::unique_ptr<cv::VideoCapture> cap_;
     unsigned int err_count_;
+    log4cplus::Logger clog_;
+
+    // processed frames count
+    unsigned long long frames_count_;
+    // start time
+    std::chrono::high_resolution_clock::time_point start_time_;
+
+    double fps_;
 };
 
 class worker

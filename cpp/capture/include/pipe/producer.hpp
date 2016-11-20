@@ -4,6 +4,15 @@
 //#include <pipe/filter.hpp>
 #include "monitor_queue.hpp"
 
+#include <log4cplus/logger.h>
+#include <log4cplus/loggingmacros.h>
+#include <log4cplus/fileappender.h>
+#include <log4cplus/loglevel.h>
+#include <log4cplus/configurator.h>
+
+using namespace log4cplus;
+using namespace log4cplus::helpers;
+
 template <class T>
 class filter
 {
@@ -22,11 +31,7 @@ public:
 
     T get()
     {
-        if (parent_)
-        {
-            return parent_->get();
-        }
-        return T();
+        return parent_->get();
     }
 
     void put(T t)
@@ -34,7 +39,6 @@ public:
         q_.enqueue(t);
     }
 
-private:
     monitor_queue<T> q_;
     std::shared_ptr<filter<T> > parent_;
 };
@@ -47,7 +51,9 @@ public:
         : func_(f)
         , pred_(pred)
         , stop_(s)
+        , lg_(Logger::getInstance("producer"))
     {
+        LOG4CPLUS_INFO(lg_, "Frame producer started...");
     }
 
     void operator()()
@@ -58,7 +64,12 @@ public:
             // will go further only if condition pass
             if (pred_(d))
             {
+                LOG4CPLUS_TRACE(lg_, "put frame into queue");
                 put(d);
+            }
+            else
+            {
+                LOG4CPLUS_WARN(lg_, "frame check does not pass");
             }
         }
     }
@@ -66,6 +77,8 @@ public:
     std::function<T(void)> func_;
     std::function<bool(const T&)> pred_;
     std::function<bool(void)> stop_;
+
+    log4cplus::Logger lg_;
 };
 
 template <class T>

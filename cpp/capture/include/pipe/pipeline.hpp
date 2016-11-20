@@ -46,25 +46,25 @@ public:
             {
 
                 auto elm = *it;
-                tgroup_.push_back(std::make_shared<std::thread>(std::ref(*elm)));
-#if 0
+//                tgroup_.push_back(std::make_shared<std::thread>(std::ref(*elm)));
+#if 1
                 // some magic
-                
-                auto prodptr = dynamic_cast<producer<T>*>(elm.get());
+                auto nptr = elm.get();
+                auto prodptr = dynamic_cast<producer<T>*>(nptr);
                 if (prodptr)
                 {
                     tgroup_.push_back(std::make_shared<std::thread>(std::ref(*prodptr)));
                 }
                 else
                 {
-                    auto transptr = dynamic_cast<transformer<T>*>(elm.get());
+                    auto transptr = dynamic_cast<transformer<T>*>(nptr);
                     if (transptr)
                     {
                         tgroup_.push_back(std::make_shared<std::thread>(std::ref(*transptr)));
                     }
                     else
                     {
-                        auto finptr = dynamic_cast<sink<T>*>(elm.get());
+                        auto finptr = dynamic_cast<sink<T>*>(nptr);
                         if (finptr)
                         {
                             tgroup_.push_back(std::make_shared<std::thread>(std::ref(*finptr)));
