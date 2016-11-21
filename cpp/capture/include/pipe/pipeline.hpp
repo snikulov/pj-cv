@@ -27,12 +27,16 @@ public:
         }
     }
 
+    template<class D>
     void add_filter(T f)
     {
         if (!filters_.empty())
         {
+            auto glue = std::make_shared<monitor_queue<D> >();
             T& prev_step = filters_.back();
-            f->set_prev(prev_step);
+
+            prev_step->output_ = glue;
+            f->input_ = glue;
         }
         filters_.push_back(f);
     }
@@ -46,8 +50,8 @@ public:
             {
 
                 auto elm = *it;
-//                tgroup_.push_back(std::make_shared<std::thread>(std::ref(*elm)));
-#if 1
+                tgroup_.push_back(std::make_shared<std::thread>(std::ref(*elm)));
+#if 0
                 // some magic
                 auto nptr = elm.get();
                 auto prodptr = dynamic_cast<producer<T>*>(nptr);

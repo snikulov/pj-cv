@@ -23,11 +23,11 @@ using namespace log4cplus;
 using namespace log4cplus::helpers;
 
 template <typename T>
-class monitor_queue : private boost::noncopyable
+class monitor_queue
 {
 public:
-    monitor_queue(std::size_t max_size = 1000)
-        : max_size_(max_size)
+    monitor_queue()
+        : max_size_(1000)
         , lg_(Logger::getInstance("monitorq"))
     {
     }

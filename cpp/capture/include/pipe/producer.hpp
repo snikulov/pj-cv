@@ -17,30 +17,37 @@ template <class T>
 class filter
 {
 public:
+    filter()
+    {
+    }
+
     virtual ~filter()
     {
-        parent_.reset();
+        input_.reset();
+        output_.reset();
     }
 
     virtual void operator()() = 0;
 
-    void set_prev(std::shared_ptr<filter<T> > p)
-    {
-        parent_ = p;
-    }
-
     T get()
     {
-        return parent_->get();
+        if (input_)
+        {
+            return input_->dequeue();
+        }
+        return T();
     }
 
     void put(T t)
     {
-        q_.enqueue(t);
+        if (output_)
+        {
+            output_->enqueue(t);
+        }
     }
 
-    monitor_queue<T> q_;
-    std::shared_ptr<filter<T> > parent_;
+    std::shared_ptr<monitor_queue<T> > input_;
+    std::shared_ptr<monitor_queue<T> > output_;
 };
 
 template <class T>

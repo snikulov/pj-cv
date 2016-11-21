@@ -25,6 +25,7 @@ public:
         {
             if (d.squares_ && !(d.squares_->empty()))
             {
+                cv::rectangle(*(d.frame_), (*(d.squares_))[0], cv::Scalar(0, 0, 255), 4);
                 // detected image
                 if (write_image(d))
                 {

@@ -52,7 +52,7 @@ public:
             if (has_objects(tmp))
             {
                 num_detected_++;
-                LOG4CPLUS_INFO(lg_, "detected circles in frame");
+//                LOG4CPLUS_INFO(lg_, "detected circles in frame");
             }
         }
 
