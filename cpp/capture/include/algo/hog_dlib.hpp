@@ -69,9 +69,9 @@ public:
 private:
     cv::Rect dlib_to_ocv(const dlib::rectangle& r)
     {
-        cv::Rect ret_val{ cv::Point2i(r.left(), r.top()), cv::Point2i(r.right() + 1, r.bottom() + 1) };
-        LOG4CPLUS_INFO(lg_, "Obj params: " << "dlib(" << r.left() << ", " << r.top() << ", " << r.right() << ", " << r.bottom() << ")");
-        LOG4CPLUS_INFO(lg_, "Obj params: " << "ocv(" << ret_val.x << ", " << ret_val.y << ", " << ret_val.height << ", " << ret_val.width << ")");
+        cv::Rect ret_val(r.left(), r.top(), r.width(), r.height());
+//        LOG4CPLUS_INFO(lg_, "Obj params: " << "dlib(" << r.left() << ", " << r.top() << ", " << r.right() << ", " << r.bottom() << ")");
+//        LOG4CPLUS_INFO(lg_, "Obj params: " << "ocv(" << ret_val.x << ", " << ret_val.y << ", " << ret_val.height << ", " << ret_val.width << ")");
         return ret_val;
     }
 

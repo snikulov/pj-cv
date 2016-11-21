@@ -89,7 +89,8 @@ private:
 
     void update_fps()
     {
-        using namespace std::chrono_literals;
+        //using namespace std::chrono_literals;
+        using namespace std::literals::chrono_literals;
         auto diff = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - start_time_);
 
         if (diff > 2s)
@@ -131,9 +132,9 @@ public:
             return data.frame_ && (!data.frame_->empty());
         };
 
-        pipeline<std::shared_ptr<filter<opencv_frame_t> > > pipe;
+        pipeline<std::shared_ptr<filter<opencv_frame_t> > , opencv_frame_t> pipe;
         auto prod = std::make_shared<producer<opencv_frame_t> >(std::ref(*cam), frame_not_null, is_stopped);
-        pipe.add_filter<opencv_frame_t>(prod);
+        pipe.add_filter(prod);
 
         auto circles_found = [frame_not_null](const opencv_frame_t& data) -> bool {
             return frame_not_null(data) && data.circles_ && (!data.circles_->empty());
@@ -141,17 +142,17 @@ public:
 
         auto circ = std::make_shared<hough_circles>();
         auto step1 = std::make_shared<transformer<opencv_frame_t> >(std::ref(*circ), circles_found, is_stopped);
-        pipe.add_filter<opencv_frame_t>(step1);
+        pipe.add_filter(step1);
 
         std::string svmpath = "tr2_80x80.svm";
         auto h = std::make_shared<hog>(svmpath);
         auto step2 = std::make_shared<transformer<opencv_frame_t> >(std::ref(*h), circles_found, is_stopped);
-        pipe.add_filter<opencv_frame_t>(step2);
+        pipe.add_filter(step2);
 
         std::string imgpath = "images";
         auto jw = std::make_shared<jpeg_writter_ex>(imgpath);
         auto step3 = std::make_shared<sink<opencv_frame_t> >(std::ref(*jw), is_stopped);
-        pipe.add_filter<opencv_frame_t>(step3);
+        pipe.add_filter(step3);
 
         pipe.run();
 

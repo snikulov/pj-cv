@@ -26,23 +26,26 @@ template <typename T>
 class monitor_queue
 {
 public:
-    monitor_queue()
-        : max_size_(1000)
+    monitor_queue(std::size_t maxelm = 1000)
+        : max_size_(maxelm)
         , lg_(Logger::getInstance("monitorq"))
     {
     }
 
-    void enqueue(T d)
+    bool enqueue(T d)
     {
         std::lock_guard<std::mutex> lock(mx_);
+        bool ret_val = true;
         if (q_.size() >= max_size_)
         {
-            LOG4CPLUS_WARN(lg_, "Queue max size exceeded");
+            LOG4CPLUS_WARN(lg_, "Queue exceeded " << max_size_ << " Will drop frames...");
             // drop frame
             q_.pop();
+            ret_val = false;
         }
         q_.push(d);
         cond_.notify_all();
+        return ret_val;
     }
 
     T dequeue(int ms_delay = 1000)

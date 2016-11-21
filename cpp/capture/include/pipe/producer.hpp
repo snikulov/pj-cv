@@ -72,7 +72,7 @@ public:
             if (pred_(d))
             {
                 LOG4CPLUS_TRACE(lg_, "put frame into queue");
-                put(d);
+                this->put(d);
             }
             else
             {
@@ -103,11 +103,11 @@ public:
     {
         while (!stop_())
         {
-            T d{ func_(get()) };
+            T d{ func_(this->get()) };
             // will go further, only if condition pass
             if (pred_(d))
             {
-                put(d);
+                this->put(d);
             }
         }
     }

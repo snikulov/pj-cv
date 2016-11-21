@@ -7,7 +7,7 @@
 
 #include "producer.hpp"
 
-template <class T>
+template <class T, class D>
 class pipeline
 {
 public:
@@ -25,18 +25,20 @@ public:
                 elm->join();
             }
         }
+        qlist_.clear();
     }
 
-    template<class D>
     void add_filter(T f)
     {
         if (!filters_.empty())
         {
             auto glue = std::make_shared<monitor_queue<D> >();
             T& prev_step = filters_.back();
-
             prev_step->output_ = glue;
             f->input_ = glue;
+
+            // for debug
+            qlist_.push_back(glue);
         }
         filters_.push_back(f);
     }
@@ -93,6 +95,9 @@ private:
     std::list<T> filters_;
     bool is_running_;
     std::list<std::shared_ptr<std::thread> > tgroup_;
+
+    // for debug
+    std::list<std::shared_ptr<monitor_queue<D> > > qlist_;
 };
 
 #endif // PIPELINE_HPP__

@@ -11,12 +11,34 @@
 
 #include "opencv_frame.hpp"
 
+#include <log4cplus/logger.h>
+#include <log4cplus/loggingmacros.h>
+#include <log4cplus/fileappender.h>
+#include <log4cplus/loglevel.h>
+#include <log4cplus/configurator.h>
+
+using namespace log4cplus;
+using namespace log4cplus::helpers;
+
 class jpeg_writter_ex
 {
 public:
     jpeg_writter_ex(const std::string& p)
-        : path_(p)
+        : lg_(Logger::getInstance("sink"))
+        , path_(p)
     {
+        namespace fs = boost::filesystem;
+
+        if (!fs::exists(path_))
+        {
+            if (!fs::create_directories(path_))
+            {
+                LOG4CPLUS_FATAL(lg_, "Unable to create folder for result: " << path_.string());
+                throw std::runtime_error("Unable create output folder");
+            }
+        }
+
+        LOG4CPLUS_INFO(lg_, "Result will be stored in " << fs::absolute(path_).string());
     }
 
     void operator()(opencv_frame_t d)
@@ -25,21 +47,53 @@ public:
         {
             if (d.squares_ && !(d.squares_->empty()))
             {
-                cv::rectangle(*(d.frame_), (*(d.squares_))[0], cv::Scalar(0, 0, 255), 4);
+                draw_objects(d);
                 // detected image
-                if (write_image(d))
+                std::string fname = get_fname(d);
+                if (write_image(d, fname))
                 {
-                    std::cerr << "Writted image: " << get_fname(d) << std::endl;
+                    LOG4CPLUS_INFO(lg_, "Writted image: " << fname);
+                }
+                else
+                {
+                    LOG4CPLUS_WARN(lg_, "Error writting fail: " << fname);
                 }
             }
         }
     }
 
 private:
-    bool write_image(const opencv_frame_t& d)
+
+    void draw_objects(opencv_frame_t& d)
+    {
+        if (d.circles_ && !(d.circles_->empty()))
+        {
+            // draw circles
+            const auto& ci = *(d.circles_);
+            for (const auto& elm : ci)
+            {
+                cv::Point center(cvRound(elm[0]), cvRound(elm[1]));
+                int radius = cvRound(elm[2]);
+                circle(*(d.frame_), center, 3, cv::Scalar(0, 255, 0), -1, 8, 0);
+                // draw the circle outline
+                circle(*(d.frame_), center, radius, cv::Scalar(0, 0, 255), 3, 8, 0);
+            }
+        }
+
+        if (d.squares_ && !(d.squares_->empty()))
+        {
+            const auto& sq = *(d.squares_);
+            for (const auto& elm : sq)
+            {
+                cv::rectangle(*(d.frame_), elm, cv::Scalar(0, 0, 255), 4);
+            }
+        }
+    }
+
+    bool write_image(const opencv_frame_t& d, const std::string& fname)
     {
         boost::filesystem::path f{ path_ };
-        f /= get_fname(d);
+        f /= fname;
         return cv::imwrite(f.string(), *(d.frame_));
     }
 
@@ -57,6 +111,7 @@ private:
         return ret;
     }
 
+    log4cplus::Logger lg_;
     boost::filesystem::path path_;
 };
 
