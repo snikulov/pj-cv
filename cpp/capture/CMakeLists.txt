@@ -36,6 +36,8 @@ include_directories(include)
 include_directories(${DEPS_ROOT}/include)
 
 link_directories(${DEPS_ROOT}/lib)
+link_directories(${DEPS_ROOT}/lib64)
+
 
 add_definitions(-DBOOST_APPLICATION_FEATURE_NS_SELECT_STD)
 if(WIN32)

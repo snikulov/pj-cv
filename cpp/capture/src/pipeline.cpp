@@ -32,6 +32,7 @@ public:
         , err_count_(0)
         , clog_(Logger::getInstance("camera"))
         , frames_count_(0)
+        , call_count_(0)
         , start_time_(std::chrono::high_resolution_clock::now())
         , fps_(0.0)
     {
@@ -46,6 +47,8 @@ public:
     opencv_frame_t operator()()
     {
         opencv_frame_t frame{};
+        call_count_++;
+        // take each 10 frame
         frame.frame_ = std::make_shared<cv::Mat>();
         if (!cap_->read(*(frame.frame_)))
         {
@@ -82,7 +85,12 @@ public:
                 }
             }
         }
-        return frame;
+        // will rate-limit output from 25->5
+        if(!(call_count_%5))
+        {
+            return frame;
+        }
+        return opencv_frame_t{};
     }
 
 private:
@@ -90,10 +98,11 @@ private:
     void update_fps()
     {
         //using namespace std::chrono_literals;
-        using namespace std::literals::chrono_literals;
+        //using namespace std::literals::chrono_literals;
         auto diff = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - start_time_);
 
-        if (diff > 2s)
+        const auto CINTERVAL = std::chrono::seconds(2);
+        if (diff > CINTERVAL)
         {
             fps_ = frames_count_ / diff.count();
         }
@@ -106,6 +115,7 @@ private:
 
     // processed frames count
     unsigned long long frames_count_;
+    unsigned long long call_count_;
     // start time
     std::chrono::high_resolution_clock::time_point start_time_;
 

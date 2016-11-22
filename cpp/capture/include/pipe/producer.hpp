@@ -67,7 +67,7 @@ public:
     {
         while (!stop_())
         {
-            T d{ func_() };
+            T d(func_());
             // will go further only if condition pass
             if (pred_(d))
             {
@@ -103,7 +103,7 @@ public:
     {
         while (!stop_())
         {
-            T d{ func_(this->get()) };
+            T d(func_(this->get()));
             // will go further, only if condition pass
             if (pred_(d))
             {
