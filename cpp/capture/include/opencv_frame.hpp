@@ -5,7 +5,7 @@
 #include <chrono>
 #include <opencv2/opencv.hpp>
 
-struct data_t
+struct opencv_frame_t
 {
     /// time, when frame captured
     std::chrono::system_clock::time_point time_captured_;

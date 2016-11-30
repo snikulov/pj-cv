@@ -6,7 +6,7 @@
 class od_interface
 {
 public:
-    virtual bool has_objects(data_t&) = 0;
+    virtual bool has_objects(opencv_frame_t&) = 0;
     virtual ~od_interface()
     {
     }
