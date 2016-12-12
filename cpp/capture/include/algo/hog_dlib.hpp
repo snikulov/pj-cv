@@ -7,7 +7,6 @@
 #include <dlib/svm_threaded.h>
 #include <dlib/image_processing.h>
 #include <dlib/data_io.h>
-#include <dlib/gui_widgets.h>
 
 #include <log4cplus/logger.h>
 #include <log4cplus/loggingmacros.h>

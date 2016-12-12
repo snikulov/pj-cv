@@ -25,8 +25,13 @@ find_package(OpenCV REQUIRED)
 find_package(Boost 1.60.0 REQUIRED COMPONENTS
     thread system date_time chrono regex filesystem atomic program_options)
 
+if(WIN32)
 ExtProjectGit("https://github.com/log4cplus/log4cplus.git" "REL_1_2_0" ${DEPS_ROOT}
     CMAKE_ARGS -DBUILD_SHARED_LIBS=ON -DUNICODE=OFF -DLOG4CPLUS_BUILD_LOGGINGSERVER=OFF -DLOG4CPLUS_BUILD_TESTING=OFF -D_WIN32_WINNT=${TARGET_WINNT})
+else()
+ExtProjectGit("https://github.com/log4cplus/log4cplus.git" "REL_1_2_0" ${DEPS_ROOT}
+    CMAKE_ARGS -DBUILD_SHARED_LIBS=ON -DUNICODE=OFF -DLOG4CPLUS_BUILD_LOGGINGSERVER=OFF -DLOG4CPLUS_BUILD_TESTING=OFF)
+endif()
 
 include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(${Boost_INCLUDE_DIRS})
@@ -85,6 +90,8 @@ target_link_libraries(pipeline
     optimized log4cplus)
 if(WIN32)
     target_link_libraries(pipeline Ws2_32)
+else()
+    target_link_libraries(pipeline rt)
 endif()
 
 add_executable(${PROJECT_NAME} ${HDR_FILES} ${SRC_FILES})
@@ -100,6 +107,8 @@ target_link_libraries(${PROJECT_NAME}
     optimized log4cplus)
 if(WIN32)
     target_link_libraries(${PROJECT_NAME} Ws2_32)
+else()
+    target_link_libraries(${PROJECT_NAME} rt)
 endif()
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
