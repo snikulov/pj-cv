@@ -3,19 +3,19 @@
 
 #include <memory>
 #include <chrono>
+#include <opencv2/opencv.hpp>
 
-namespace cv
-{
-class Mat;
-} // namespace cv
-
-struct data_t
+struct opencv_frame_t
 {
     /// time, when frame captured
     std::chrono::system_clock::time_point time_captured_;
 
     /// frame with image data
     std::shared_ptr<cv::Mat> frame_;
+
+    /// opencv Circles found
+    std::shared_ptr<std::vector<cv::Vec3f> > circles_;
+    std::shared_ptr<std::vector<cv::Rect> > squares_;
 };
 
 #endif
