@@ -59,6 +59,7 @@ set(HDR_FILES
     include/monitor_queue.hpp
     include/jpeg_writter.hpp
     include/jpeg_writter_ex.hpp
+    include/jpeg_writter_sql.hpp
     include/opencv_frame.hpp
     include/algorithm_factory.hpp
     include/algo/od_interface.hpp
@@ -84,12 +85,15 @@ add_subdirectory(ext/dlib)
 #add_subdirectory(ext/log4cplus)
 
 add_executable(pipeline src/pipeline.cpp)
-add_dependencies(pipeline log4cplus.git)
+add_dependencies(pipeline log4cplus.git soci.git)
 target_include_directories(pipeline PUBLIC ext/dlib)
 target_link_libraries(pipeline
     ${OpenCV_LIBS}
     dlib
     ${Boost_LIBRARIES}
+    soci_core
+    soci_mysql
+    mysqlclient
     ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(pipeline
     debug log4cplusD

@@ -3,7 +3,8 @@
 #include "opencv_frame.hpp"
 #include "algo/hough_circles.hpp"
 #include "algo/hog_dlib.hpp"
-#include "jpeg_writter_ex.hpp"
+//#include "jpeg_writter_ex.hpp"
+#include "jpeg_writter_sql.hpp"
 
 #include <opencv2/opencv.hpp>
 #include <boost/application.hpp>
@@ -160,7 +161,7 @@ public:
         pipe.add_filter(step2);
 
         std::string imgpath = "images";
-        auto jw = std::make_shared<jpeg_writter_ex>(imgpath);
+        auto jw = std::make_shared<jpeg_writter_sql>(imgpath);
         auto step3 = std::make_shared<sink<opencv_frame_t> >(std::ref(*jw), is_stopped);
         pipe.add_filter(step3);
 
