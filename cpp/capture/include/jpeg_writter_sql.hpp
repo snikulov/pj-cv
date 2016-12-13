@@ -132,12 +132,14 @@ private:
             std::string params;
             std::string udt;
             auto fname = get_fname(d);
+            std::string jpeg_data(buf.begin(), buf.end());
 
-            LOG4CPLUS_ERROR(lg_, "imencode successful, try to insert into db");
+            LOG4CPLUS_INFO(lg_, "imencode successful, try to insert into db");
 
-            sql_ << "insert into pizzaz values(4, 4, :cdt, 9, 9, 9, 9, 9, 9, 9, :ver, :params, :udt, :fname, :photo)",
-                    use(cdt), use(ver), use(params), use(udt), use(fname), use(buf);
-            LOG4CPLUS_ERROR(lg_, "done... fname is " << fname);
+            sql_ << "insert into pizzaz(PRODUCT_ID, RESTAURANT_ID, CAPTURE_DT, DIAMETER, CHEESE, COLOR, COATING, WELL, EDGE, RES, VER, FILENAME, PHOTO_SRC)"
+                                 "values(    4,          1,           :cdt,         9,      9,      9,      9,     9,    9,    9,  :ver, :fname, :jpeg_data)",
+                                  use(cdt), use(ver), use(fname), use(jpeg_data);
+            LOG4CPLUS_INFO(lg_, "done... fname is " << fname);
 
         }
         else
