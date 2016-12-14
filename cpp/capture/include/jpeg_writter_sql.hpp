@@ -28,9 +28,9 @@ class jpeg_writter_sql
 public:
     jpeg_writter_sql(const std::string&)
         : lg_(Logger::getInstance("jpgsql"))
-        , sql_("mysql", "host=87.255.232.104 port=3306 user=pizza password=pizza1 db=pj")
+        , sql_("mysql", "host=192.168.9.233 port=3306 user=pizza password=pizza1 db=pj")
     {
-        LOG4CPLUS_INFO(lg_, "Result will be stored in mysql host=87.255.232.104 port=3306 db=pj");
+        LOG4CPLUS_INFO(lg_, "Result will be stored in mysql host=192.168.9.233 port=3306 db=pj");
     }
 
     void operator()(opencv_frame_t d)
@@ -136,7 +136,7 @@ private:
 
             LOG4CPLUS_INFO(lg_, "imencode successful, try to insert into db");
 
-            sql_ << "insert into pizzaz(PRODUCT_ID, RESTAURANT_ID, CAPTURE_DT, DIAMETER, CHEESE, COLOR, COATING, WELL, EDGE, RES, VER, FILENAME, PHOTO_SRC)"
+            sql_ << "insert into pizzas(PRODUCT_ID, RESTAURANT_ID, CAPTURE_DT, DIAMETER, CHEESE, COLOR, COATING, WELL, EDGE, RES, VER, FILENAME, PHOTO_SRC)"
                                  "values(    4,          1,           :cdt,         9,      9,      9,      9,     9,    9,    9,  :ver, :fname, :jpeg_data)",
                                   use(cdt), use(ver), use(fname), use(jpeg_data);
             LOG4CPLUS_INFO(lg_, "done... fname is " << fname);
