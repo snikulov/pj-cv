@@ -58,6 +58,7 @@ private:
 
     void draw_objects(opencv_frame_t& d)
     {
+#if 0
         if (d.circles_ && !(d.circles_->empty()))
         {
             // draw circles
@@ -71,7 +72,7 @@ private:
                 circle(*(d.frame_), center, radius, cv::Scalar(0, 0, 255), 3, 8, 0);
             }
         }
-
+#endif
         if (d.squares_ && !(d.squares_->empty()))
         {
             const auto& sq = *(d.squares_);
@@ -128,17 +129,27 @@ private:
 //            );
 
             auto cdt = get_time_captured(d);
-            std::string ver {"1"};
+            std::string ver {"v0.1"};
             std::string params;
             std::string udt;
             auto fname = get_fname(d);
             std::string jpeg_data(buf.begin(), buf.end());
+            long id = 0;
 
             LOG4CPLUS_INFO(lg_, "imencode successful, try to insert into db");
 
-            sql_ << "insert into pizzas(PRODUCT_ID, RESTAURANT_ID, CAPTURE_DT, DIAMETER, CHEESE, COLOR, COATING, WELL, EDGE, RES, VER, FILENAME, PHOTO_SRC)"
-                                 "values(    4,          1,           :cdt,         9,      9,      9,      9,     9,    9,    9,  :ver, :fname, :jpeg_data)",
-                                  use(cdt), use(ver), use(fname), use(jpeg_data);
+            sql_ << "insert into pizzas(PRODUCT_ID, RESTAURANT_ID, CAPTURE_DT, DIAMETER, CHEESE, COLOR, COATING, WELL, EDGE, RES, VER, FILENAME)"
+                                 "values(    4,          1,           :cdt,         35,      9,      9,      9,     9,    9,    9,  :ver, :fname)",
+                                  use(cdt), use(ver), use(fname);
+	    if(sql_.get_last_insert_id("pizzas", id))
+            {
+                sql_ << "insert into photos(id, capture_dt, filename, photo_src)"
+                        "values( :id, :cdt, :fname, :jpeg_data)", use(id), use(cdt), use(fname), use(jpeg_data);
+            }
+            else
+            {
+                LOG4CPLUS_ERROR(lg_, "get_last_insert_id returned error");
+            }
             LOG4CPLUS_INFO(lg_, "done... fname is " << fname);
 
         }
