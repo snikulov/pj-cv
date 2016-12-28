@@ -1,0 +1,12 @@
+﻿  PizzaJones.cpp
+c:\users\haxpe\documents\visual studio 2015\projects\pizzajones\pizzajones\pizzajones.cpp(83): warning C4010: single-line comment contains line-continuation character
+c:\users\haxpe\documents\visual studio 2015\projects\pizzajones\pizzajones\pizzajones.cpp(118): warning C4244: '=': conversion from 'const int' to 'float', possible loss of data
+c:\users\haxpe\documents\visual studio 2015\projects\pizzajones\pizzajones\pizzajones.cpp(119): warning C4244: '=': conversion from 'const int' to 'float', possible loss of data
+c:\users\haxpe\documents\visual studio 2015\projects\pizzajones\pizzajones\pizzajones.cpp(120): warning C4244: '=': conversion from 'const int' to 'float', possible loss of data
+c:\users\haxpe\documents\visual studio 2015\projects\pizzajones\pizzajones\pizzajones.cpp(127): warning C4244: '=': conversion from 'const double' to 'float', possible loss of data
+c:\users\haxpe\documents\visual studio 2015\projects\pizzajones\pizzajones\pizzajones.cpp(128): warning C4244: '=': conversion from 'const double' to 'float', possible loss of data
+c:\users\haxpe\documents\visual studio 2015\projects\pizzajones\pizzajones\pizzajones.cpp(129): warning C4244: '=': conversion from 'const double' to 'float', possible loss of data
+c:\users\haxpe\documents\visual studio 2015\projects\pizzajones\pizzajones\pizzajones.cpp(130): warning C4244: '=': conversion from 'const double' to 'float', possible loss of data
+c:\users\haxpe\documents\visual studio 2015\projects\pizzajones\pizzajones\pizzajones.cpp(221): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+  PizzaJones.vcxproj -> C:\Users\haxpe\documents\visual studio 2015\Projects\PizzaJones\x64\Debug\PizzaJones.exe
+  PizzaJones.vcxproj -> C:\Users\haxpe\documents\visual studio 2015\Projects\PizzaJones\x64\Debug\PizzaJones.pdb (Full PDB)
