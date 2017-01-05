@@ -42,7 +42,10 @@ class jpeg_writter_sql
             {
                 if (d.squares_ && !(d.squares_->empty()))
                 {
+#if 0
+                    // draw found objects on frame
                     draw_objects(d);
+#endif
                     // detected image
                     std::string fname = get_fname(d);
                     if (write_image(d, fname))
@@ -133,7 +136,7 @@ class jpeg_writter_sql
 
                 auto cdt = get_time_captured(d);
                 std::string ver {"v0.1"};
-                std::string params;
+                std::string params = get_json_params(d);
                 std::string udt;
                 auto fname = get_fname(d);
                 std::string jpeg_data(buf.begin(), buf.end());
@@ -146,9 +149,9 @@ class jpeg_writter_sql
                 int well    = get_random_int_val();
                 int edge    = get_random_int_val();
                 int res     = get_random_int_val();
-                sql_ << "insert into pizzas(PRODUCT_ID, RESTAURANT_ID, CAPTURE_DT, DIAMETER, CHEESE, COLOR, COATING, WELL, EDGE, RES, VER, FILENAME)"
-                    "values(    4,          1,           :cdt,         35, :cheese, :color,  :coating,  :well,    :edge, :res,  :ver, :fname)",
-                    use(cdt), use(cheese), use(color), use(coating), use(well), use(edge), use(res) ,use(ver), use(fname);
+                sql_ << "insert into pizzas(PRODUCT_ID, RESTAURANT_ID, CAPTURE_DT, DIAMETER, CHEESE, COLOR, COATING, WELL, EDGE, RES, VER, PARAMS, FILENAME)"
+                    "values(    4,          1,           :cdt,         35, :cheese, :color,  :coating,  :well,    :edge, :res,  :ver, :params, :fname)",
+                    use(cdt), use(cheese), use(color), use(coating), use(well), use(edge), use(res) ,use(ver), use(params), use(fname);
                 if(sql_.get_last_insert_id("pizzas", id))
                 {
                     sql_ << "insert into photos(id, capture_dt, filename, photo_src)"
@@ -168,6 +171,36 @@ class jpeg_writter_sql
 
         }
 
+        std::string get_cv_square(const cv::Rect& r)
+        {
+            std::string ret = "{ ";
+            ret += (std::string("\"x\": ") + std::to_string(static_cast<int>(r.x)) + std::string(","));
+            ret += (std::string("\"y\": ") + std::to_string(static_cast<int>(r.y)) + std::string(","));
+            ret += (std::string("\"w\": ") + std::to_string(static_cast<int>(r.width)) + std::string(","));
+            ret += (std::string("\"h\": ") + std::to_string(static_cast<int>(r.height)) + std::string(" }"));
+            return ret;
+        }
+
+        std::string get_json_params(const opencv_frame_t& d)
+        {
+            std::string ret_json;
+            if (d.squares_ && !(d.squares_->empty()))
+            {
+                int cnt = 0;
+                ret_json = "{ \"squares\": [ ";
+                const auto& sq = *(d.squares_);
+                for (const auto& elm : sq)
+                {
+                    if (cnt)
+                    {
+                        ret_json += ", ";
+                    }
+                    ret_json += get_cv_square(elm);
+                    cnt++;
+                }
+            }
+            return ret_json;
+        }
 
         std::string get_fname(const opencv_frame_t& d)
         {
