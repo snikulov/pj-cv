@@ -27,12 +27,13 @@ using namespace log4cplus::helpers;
 class jpeg_writter_sql
 {
     public:
-        jpeg_writter_sql(const std::string&)
+        jpeg_writter_sql(const std::string& dbip)
             : lg_(Logger::getInstance("jpgsql"))
-              , sql_("mysql", "host=192.168.9.233 port=3306 user=pizza password=pizza1 db=pj")
+              , dbip_(dbip)
+              , sql_("mysql", std::string("host=") + dbip_ + std::string(" port=3306 user=pizza password=pizza1 db=pj"))
               , di_(6, 10)
     {
-        LOG4CPLUS_INFO(lg_, "Result will be stored in mysql host=192.168.9.233 port=3306 db=pj");
+        LOG4CPLUS_INFO(lg_, std::string("Result will be stored on mysql host=") << dbip_ << " port=3306 db=pj");
     }
 
         void operator()(opencv_frame_t d)
@@ -185,6 +186,7 @@ class jpeg_writter_sql
         }
 
         log4cplus::Logger lg_;
+        std::string dbip_;
         soci::session sql_;
         std::uniform_int_distribution<int> di_;
         std::default_random_engine dre_;

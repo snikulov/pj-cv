@@ -126,7 +126,13 @@ int main(int argc, char* argv[])
 
     po::options_description desc{ "Options" };
     // clang-format off
-    desc.add_options()("help,h", "Help screen")("url,u", po::value<std::string>(&url)->default_value("rtsp://admin:admin@212.45.31.140:554/h264"), "camera url")("out,o", po::value<std::string>(&out_dir)->default_value("images"), "output folder")("algo,a", po::value<std::string>(&out_dir)->default_value("circles"), "detection algorithm[circles|hog]")("svmpath,s", po::value<std::string>(&out_dir)->default_value("object_detector.svm"), "path to obj detector svm")("video,v", po::value<bool>()->default_value(false), "control capture window display");
+    desc.add_options()
+        ("help,h", "Help screen")
+        ("url,u", po::value<std::string>(&url)->default_value("rtsp://admin:admin@212.45.31.140:554/h264"), "camera url")
+        ("out,o", po::value<std::string>(&out_dir)->default_value("images"), "output folder")
+        ("algo,a", po::value<std::string>(&out_dir)->default_value("circles"), "detection algorithm[circles|hog]")
+        ("svmpath,s", po::value<std::string>(&out_dir)->default_value("object_detector.svm"), "path to obj detector svm")
+        ("video,v", po::value<bool>()->default_value(false), "control capture window display");
     // clang-format on
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
