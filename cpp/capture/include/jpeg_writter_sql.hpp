@@ -198,6 +198,7 @@ class jpeg_writter_sql
                     ret_json += get_cv_square(elm);
                     cnt++;
                 }
+                ret_json += " ] }";
             }
             return ret_json;
         }
