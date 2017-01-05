@@ -149,7 +149,7 @@ public:
             ("svmpath,s", po::value<std::string>(&svmpath)->default_value("tr2_80x80.svm"), "path to obj detector svm");
         // clang-format on
         po::variables_map vm;
-        po::store(po::parse_command_line(ctxarg->argc, ctxarg->argv, desc), vm);
+        po::store(po::parse_command_line(ctxarg->argc(), ctxarg->argv(), desc), vm);
         po::notify(vm);
 
         if (!vm.count("help"))
