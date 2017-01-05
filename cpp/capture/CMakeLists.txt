@@ -32,6 +32,9 @@ else()
 ExtProjectGit("https://github.com/log4cplus/log4cplus.git" "REL_1_2_0" ${DEPS_ROOT}
     CMAKE_ARGS -DBUILD_SHARED_LIBS=ON -DUNICODE=OFF -DLOG4CPLUS_BUILD_LOGGINGSERVER=OFF -DLOG4CPLUS_BUILD_TESTING=OFF)
 endif()
+ExtProjectGit("https://github.com/snikulov/soci.git" "soci_mysql" ${DEPS_ROOT}
+    CMAKE_ARGS -DSOCI_DB2=OFF -DSOCI_EMPTY=OFF -DSOCI_FIREBIRD=OFF -DSOCI_MYSQL=ON -DSOCI_ODBC=OFF -DSOCI_ORACLE=OFF -DSOCI_POSTGRESQL=OFF -DSOCI_SQLITE3=OFF)
+
 
 include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(${Boost_INCLUDE_DIRS})
@@ -42,6 +45,9 @@ include_directories(${DEPS_ROOT}/include)
 
 link_directories(${DEPS_ROOT}/lib)
 link_directories(${DEPS_ROOT}/lib64)
+if(NOT WIN32)
+link_directories(/usr/lib64/mysql)
+endif()
 
 
 add_definitions(-DBOOST_APPLICATION_FEATURE_NS_SELECT_STD)
@@ -53,6 +59,7 @@ set(HDR_FILES
     include/monitor_queue.hpp
     include/jpeg_writter.hpp
     include/jpeg_writter_ex.hpp
+    include/jpeg_writter_sql.hpp
     include/opencv_frame.hpp
     include/algorithm_factory.hpp
     include/algo/od_interface.hpp
@@ -78,12 +85,15 @@ add_subdirectory(ext/dlib)
 #add_subdirectory(ext/log4cplus)
 
 add_executable(pipeline src/pipeline.cpp)
-add_dependencies(pipeline log4cplus.git)
+add_dependencies(pipeline log4cplus.git soci.git)
 target_include_directories(pipeline PUBLIC ext/dlib)
 target_link_libraries(pipeline
     ${OpenCV_LIBS}
     dlib
     ${Boost_LIBRARIES}
+    soci_core
+    soci_mysql
+    mysqlclient
     ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(pipeline
     debug log4cplusD
@@ -115,3 +125,20 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND
     ${CMAKE_COMMAND} -E copy_directory "${DEPS_ROOT}/bin" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/"
     VERBATIM)
+
+add_executable(mysqlstore ${HDR_FILES} src/mysqlstore.cpp)
+add_dependencies(mysqlstore log4cplus.git soci.git)
+target_link_libraries(mysqlstore
+    ${Boost_LIBRARIES}
+    soci_core
+    soci_mysql
+    mysqlclient
+    ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(mysqlstore
+    debug log4cplusD
+    optimized log4cplus)
+if(WIN32)
+    target_link_libraries(mysqlstore Ws2_32)
+else()
+    target_link_libraries(mysqlstore rt)
+endif()

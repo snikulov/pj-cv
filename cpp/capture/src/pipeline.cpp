@@ -3,7 +3,8 @@
 #include "opencv_frame.hpp"
 #include "algo/hough_circles.hpp"
 #include "algo/hog_dlib.hpp"
-#include "jpeg_writter_ex.hpp"
+//#include "jpeg_writter_ex.hpp"
+#include "jpeg_writter_sql.hpp"
 
 #include <opencv2/opencv.hpp>
 #include <boost/application.hpp>
@@ -129,45 +130,69 @@ public:
         : ctx_(ctx)
     {
     }
+
     int operator()()
     {
-        std::string url{ "rtsp://admin:admin@212.45.31.140:554/h264" };
-        auto cam = std::make_shared<ocv_cam>(url);
-        auto is_stopped = [&]()->bool
-        {
-            return (ctx_.find<app::status>())->state() == app::status::stopped;
-        };
+        auto ctxarg = ctx_.find<app::args>();
+        namespace po = boost::program_options;
 
-        auto frame_not_null = [](const opencv_frame_t& data) -> bool {
-            return data.frame_ && (!data.frame_->empty());
-        };
-
-        pipeline<std::shared_ptr<filter<opencv_frame_t> > , opencv_frame_t> pipe;
-        auto prod = std::make_shared<producer<opencv_frame_t> >(std::ref(*cam), frame_not_null, is_stopped);
-        pipe.add_filter(prod);
-
-        auto circles_found = [frame_not_null](const opencv_frame_t& data) -> bool {
-            return frame_not_null(data) && data.circles_ && (!data.circles_->empty());
-        };
-
-        auto circ = std::make_shared<hough_circles>();
-        auto step1 = std::make_shared<transformer<opencv_frame_t> >(std::ref(*circ), circles_found, is_stopped);
-        pipe.add_filter(step1);
-
+        std::string url = "rtsp://admin:admin@212.45.31.140:554/h264";
+        std::string dst = "192.168.9.233";
         std::string svmpath = "tr2_80x80.svm";
-        auto h = std::make_shared<hog>(svmpath);
-        auto step2 = std::make_shared<transformer<opencv_frame_t> >(std::ref(*h), circles_found, is_stopped);
-        pipe.add_filter(step2);
 
-        std::string imgpath = "images";
-        auto jw = std::make_shared<jpeg_writter_ex>(imgpath);
-        auto step3 = std::make_shared<sink<opencv_frame_t> >(std::ref(*jw), is_stopped);
-        pipe.add_filter(step3);
+        po::options_description desc{ "Options" };
+        // clang-format off
+        desc.add_options()
+            ("help,h", "Help")
+            ("url,u", po::value<std::string>(&url)->default_value("rtsp://admin:admin@212.45.31.140:554/h264"), "camera url")
+            ("out,o", po::value<std::string>(&dst)->default_value("192.168.9.233"), "db server ip")
+            ("svmpath,s", po::value<std::string>(&svmpath)->default_value("tr2_80x80.svm"), "path to obj detector svm");
+        // clang-format on
+        po::variables_map vm;
+        po::store(po::parse_command_line(ctxarg->argc(), ctxarg->argv(), desc), vm);
+        po::notify(vm);
 
-        pipe.run();
+        if (!vm.count("help"))
+        {
+            auto cam = std::make_shared<ocv_cam>(url);
 
-        ctx_.find<app::wait_for_termination_request>()->wait();
+            auto is_stopped = [&]()->bool
+            {
+                return (ctx_.find<app::status>())->state() == app::status::stopped;
+            };
 
+            auto frame_not_null = [](const opencv_frame_t& data) -> bool {
+                return data.frame_ && (!data.frame_->empty());
+            };
+
+            pipeline<std::shared_ptr<filter<opencv_frame_t> >, opencv_frame_t> pipe;
+            auto prod = std::make_shared<producer<opencv_frame_t> >(std::ref(*cam), frame_not_null, is_stopped);
+            pipe.add_filter(prod);
+
+            auto circles_found = [frame_not_null](const opencv_frame_t& data) -> bool {
+                return frame_not_null(data) && data.circles_ && (!data.circles_->empty());
+            };
+
+            auto circ = std::make_shared<hough_circles>();
+            auto step1 = std::make_shared<transformer<opencv_frame_t> >(std::ref(*circ), circles_found, is_stopped);
+            pipe.add_filter(step1);
+
+            auto h = std::make_shared<hog>(svmpath);
+            auto step2 = std::make_shared<transformer<opencv_frame_t> >(std::ref(*h), circles_found, is_stopped);
+            pipe.add_filter(step2);
+
+            auto jw = std::make_shared<jpeg_writter_sql>(dst);
+            auto step3 = std::make_shared<sink<opencv_frame_t> >(std::ref(*jw), is_stopped);
+            pipe.add_filter(step3);
+
+            pipe.run();
+
+            ctx_.find<app::wait_for_termination_request>()->wait();
+        }
+        else
+        {
+            std::cout << desc << "\n";
+        }
         return 0;
     }
 
