@@ -45,12 +45,12 @@ D:\Projects\pj-cv\experemental\tiny-cnn\Project1\csv.h(1054): warning C4305: '='
           [
               T=std::string
           ]
-  ..\..\..\..\tiny-dnn\examples\benchmarks\main.cpp(141): note: see reference to function template instantiation 'bool io::CSVReader<9,io::trim_chars<32,9>,io::no_quote_escape<44>,io::throw_on_overflow,io::no_comment>::read_row<std::string,int,float,float,float,float,float,float,float>(std::string &,int &,float &,float &,float &,float &,float &,float &,float &)' being compiled
-  ..\..\..\..\tiny-dnn\examples\benchmarks\main.cpp(141): note: see reference to function template instantiation 'bool io::CSVReader<9,io::trim_chars<32,9>,io::no_quote_escape<44>,io::throw_on_overflow,io::no_comment>::read_row<std::string,int,float,float,float,float,float,float,float>(std::string &,int &,float &,float &,float &,float &,float &,float &,float &)' being compiled
+  ..\..\..\..\tiny-dnn\examples\benchmarks\main.cpp(323): note: see reference to function template instantiation 'bool io::CSVReader<9,io::trim_chars<32,9>,io::no_quote_escape<44>,io::throw_on_overflow,io::no_comment>::read_row<std::string,int,float,float,float,float,float,float,float>(std::string &,int &,float &,float &,float &,float &,float &,float &,float &)' being compiled
+  ..\..\..\..\tiny-dnn\examples\benchmarks\main.cpp(323): note: see reference to function template instantiation 'bool io::CSVReader<9,io::trim_chars<32,9>,io::no_quote_escape<44>,io::throw_on_overflow,io::no_comment>::read_row<std::string,int,float,float,float,float,float,float,float>(std::string &,int &,float &,float &,float &,float &,float &,float &,float &)' being compiled
   Generating code
-  5397 of 8948 functions (60.3%) were compiled, the rest were copied from previous compilation.
-    4702 functions were new in current compilation
-    892 functions had inline decision re-evaluated but remain unchanged
+  7245 of 10781 functions (67.2%) were compiled, the rest were copied from previous compilation.
+    6535 functions were new in current compilation
+    895 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   Project1.vcxproj -> D:\Projects\tiny-dnn\x64\Release\Project1.exe
   Project1.vcxproj -> D:\Projects\tiny-dnn\x64\Release\Project1.pdb (Full PDB)

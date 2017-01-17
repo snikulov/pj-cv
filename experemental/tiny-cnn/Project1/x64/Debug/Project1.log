@@ -4,8 +4,6 @@ d:\projects\tiny-dnn\tiny_dnn\config.h(44): warning C4005: 'CNN_USE_SSE': macro 
 d:\projects\pj-cv\experemental\tiny-cnn\project1\csv.h(152): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
 d:\projects\pj-cv\experemental\tiny-cnn\project1\csv.h(169): warning C4244: 'return': conversion from 'std::streamsize' to 'int', possible loss of data
 d:\projects\pj-cv\experemental\tiny-cnn\project1\csv.h(185): warning C4244: '=': conversion from '__int64' to 'int', possible loss of data
-d:\projects\tiny-dnn\examples\benchmarks\main.cpp(117): warning C4305: 'initializing': truncation from 'double' to 'float'
-d:\projects\tiny-dnn\examples\benchmarks\main.cpp(118): warning C4305: 'initializing': truncation from 'double' to 'float'
 d:\projects\pj-cv\experemental\tiny-cnn\project1\csv.h(1054): warning C4305: '=': truncation from 'double' to 'float'
   d:\projects\pj-cv\experemental\tiny-cnn\project1\csv.h(1080): note: see reference to function template instantiation 'void io::detail::parse_float<float>(const char *,T &)' being compiled
           with
@@ -47,7 +45,7 @@ d:\projects\pj-cv\experemental\tiny-cnn\project1\csv.h(1054): warning C4305: '='
           [
               T=std::string
           ]
-  d:\projects\tiny-dnn\examples\benchmarks\main.cpp(141): note: see reference to function template instantiation 'bool io::CSVReader<9,io::trim_chars<32,9>,io::no_quote_escape<44>,io::throw_on_overflow,io::no_comment>::read_row<std::string,int,float,float,float,float,float,float,float>(std::string &,int &,float &,float &,float &,float &,float &,float &,float &)' being compiled
-  d:\projects\tiny-dnn\examples\benchmarks\main.cpp(141): note: see reference to function template instantiation 'bool io::CSVReader<9,io::trim_chars<32,9>,io::no_quote_escape<44>,io::throw_on_overflow,io::no_comment>::read_row<std::string,int,float,float,float,float,float,float,float>(std::string &,int &,float &,float &,float &,float &,float &,float &,float &)' being compiled
+  d:\projects\tiny-dnn\examples\benchmarks\main.cpp(143): note: see reference to function template instantiation 'bool io::CSVReader<9,io::trim_chars<32,9>,io::no_quote_escape<44>,io::throw_on_overflow,io::no_comment>::read_row<std::string,int,float,float,float,float,float,float,float>(std::string &,int &,float &,float &,float &,float &,float &,float &,float &)' being compiled
+  d:\projects\tiny-dnn\examples\benchmarks\main.cpp(143): note: see reference to function template instantiation 'bool io::CSVReader<9,io::trim_chars<32,9>,io::no_quote_escape<44>,io::throw_on_overflow,io::no_comment>::read_row<std::string,int,float,float,float,float,float,float,float>(std::string &,int &,float &,float &,float &,float &,float &,float &,float &)' being compiled
   Project1.vcxproj -> D:\Projects\tiny-dnn\x64\Debug\Project1.exe
   Project1.vcxproj -> D:\Projects\tiny-dnn\x64\Debug\Project1.pdb (Partial PDB)
