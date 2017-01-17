@@ -21,13 +21,13 @@ set(DEPS_ROOT "${CMAKE_BINARY_DIR}/deps")
 set(Boost_USE_STATIC_LIBS ON)
 
 find_package(Threads REQUIRED)
-#find_package(OpenCV REQUIRED)
+find_package(OpenCV REQUIRED)
 #find_package(Boost 1.60.0 REQUIRED COMPONENTS
 #    thread system date_time chrono regex filesystem atomic program_options)
 
 ExtProjectGit("https://github.com/snikulov/tiny-dnn.git" "install_fix" ${DEPS_ROOT} CMAKE_ARGS -DTBB_FIND_REQUIRED=OFF)
 
-#include_directories(${OpenCV_INCLUDE_DIRS})
+include_directories(${OpenCV_INCLUDE_DIRS})
 #include_directories(${Boost_INCLUDE_DIRS})
 #include_directories(ext/application/include)
 #include_directories(ext/date)
@@ -50,9 +50,14 @@ set(SRC_FILES
 
 add_executable(${PROJECT_NAME} ${SRC_FILES})
 target_link_libraries(${PROJECT_NAME}
-    ${CMAKE_THREAD_LIBS_INIT})
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${OpenCV_LIBS})
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND
     ${CMAKE_COMMAND} -E copy_directory "${DEPS_ROOT}/bin" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/"
     VERBATIM)
+
+if (MSVC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
+endif()
