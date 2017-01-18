@@ -604,11 +604,12 @@ int  main(int argc, char** argv) {
 				res_last = res_first + vn;
 				vec_t res_subvector(res_first, res_last);
 				res_first = res_last;
-				std::cout << std::right << setw(4) << setfill(' ') << setprecision(1) << vec_t2value(res_subvector, vmin, vmax);
+				std::cout << setw(5) << setfill(' ') << vec_t2value(res_subvector, vmin, vmax);
 			}
 			std::cout << std::endl;
 		}
 		else throw "Cannot load image: " + options["i"].as<std::string>() + " ABORTING";
+		std::cout << std::endl;
 	}
 
 	if (!options.count("p"))
@@ -616,10 +617,12 @@ int  main(int argc, char** argv) {
 		targets2test = targets2train;
 		images2test = images2train;
 	}
-
-	std::cout << "Calculating loss from TRAIN ..." << std::endl;
-	auto loss = nn.get_loss<mse>(images2test, targets2test);
-	std::cout << "loss:" << loss << std::endl;
+	if (images2test.size())
+	{
+		std::cout << "Calculating loss from TRAIN ..." << std::endl;
+		auto loss = nn.get_loss<mse>(images2test, targets2test);
+		std::cout << "loss:" << loss << std::endl;
+	}
 
 	for (int i = 0; i < targets2test.size(); i++)
 	{
@@ -656,7 +659,7 @@ int  main(int argc, char** argv) {
 			vec_t target_subvector(target_first, target_last);
 			res_first = res_last;
 			target_first = target_last;
-			std::cout << std::right << setw(9) << setfill(' ') << setprecision(1) << vec_t2value(res_subvector, vmin, vmax) << "/" << vec_t2value(target_subvector, vmin, vmax);
+			std::cout << setw(12) << setfill(' ')  << vec_t2value(res_subvector, vmin, vmax) << "/" << vec_t2value(target_subvector, vmin, vmax);
 		}
 		std::cout << std::endl;
 	}
