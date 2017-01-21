@@ -54,6 +54,7 @@ find_package(Boost 1.60.0 REQUIRED COMPONENTS
     thread system date_time chrono regex filesystem atomic program_options)
 
 if(WIN32)
+
 ExtProjectGit("https://github.com/log4cplus/log4cplus.git" "REL_1_2_0" ${DEPS_ROOT}
     CMAKE_ARGS -DBUILD_SHARED_LIBS=ON -DUNICODE=OFF -DLOG4CPLUS_BUILD_LOGGINGSERVER=OFF -DLOG4CPLUS_BUILD_TESTING=OFF -D_WIN32_WINNT=${TARGET_WINNT})
 else()
@@ -62,7 +63,7 @@ ExtProjectGit("https://github.com/log4cplus/log4cplus.git" "REL_1_2_0" ${DEPS_RO
 endif()
 ExtProjectGit("https://github.com/snikulov/soci.git" "soci_mysql" ${DEPS_ROOT}
     CMAKE_ARGS -DSOCI_DB2=OFF -DSOCI_EMPTY=OFF -DSOCI_FIREBIRD=OFF -DSOCI_MYSQL=ON -DSOCI_ODBC=OFF -DSOCI_ORACLE=OFF -DSOCI_POSTGRESQL=OFF -DSOCI_SQLITE3=OFF)
-
+ExtProjectGit("https://github.com/snikulov/tiny-dnn.git" "install_fix" ${DEPS_ROOT} CMAKE_ARGS -DTBB_FIND_REQUIRED=OFF)
 
 include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(${Boost_INCLUDE_DIRS})
@@ -80,6 +81,7 @@ endif()
 
 add_definitions(-DBOOST_APPLICATION_FEATURE_NS_SELECT_STD)
 if(WIN32)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
     add_definitions(-DWIN32_LEAN_AND_MEAN)
     add_definitions(-D_WIN32_WINNT=0x0600)
 endif()
@@ -113,7 +115,7 @@ add_subdirectory(ext/dlib)
 #add_subdirectory(ext/log4cplus)
 
 add_executable(pipeline src/pipeline.cpp)
-add_dependencies(pipeline log4cplus.git soci.git)
+add_dependencies(pipeline log4cplus.git soci.git tiny-dnn.git)
 target_include_directories(pipeline PUBLIC ext/dlib)
 target_link_libraries(pipeline
     ${OpenCV_LIBS}
