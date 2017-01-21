@@ -16,3 +16,6 @@
 [submodule "cpp/capture/cmake"]
 	path = cpp/capture/cmake
 	url = https://github.com/snikulov/cmake-modules.git
+[submodule "cpp/train-dnn/cmake"]
+	path = cpp/train-dnn/cmake
+	url = https://github.com/snikulov/cmake-modules.git
