@@ -52,6 +52,7 @@ add_executable(${PROJECT_NAME} ${SRC_FILES})
 target_link_libraries(${PROJECT_NAME}
     ${CMAKE_THREAD_LIBS_INIT}
     ${OpenCV_LIBS})
+add_dependencies(${PROJECT_NAME} tiny-dnn.git)
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND
