@@ -31,13 +31,9 @@
 #include <random>
 #include <sstream>
 
-#include <opencv2/opencv.hpp>
-
 #include <boost/application.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/noncopyable.hpp>
-
-#include "opencv_frame.hpp"
 
 #include <soci/mysql/soci-mysql.h>
 #include <soci/soci.h>
@@ -48,13 +44,14 @@
 #include <log4cplus/loggingmacros.h>
 #include <log4cplus/loglevel.h>
 
-#include "tiny_dnn/tiny_dnn.h"
+#include <tiny_dnn/tiny_dnn.h>
+
+#include "opencv_frame.hpp"
 
 using namespace log4cplus;
 using namespace log4cplus::helpers;
-using namespace cv;
-using namespace tiny_dnn;
-using namespace std;
+
+using tiny_dnn::vec_t;
 
 class jpeg_writter_sql
 {
@@ -100,20 +97,19 @@ private:
     void draw_objects(opencv_frame_t& d)
     {
 #if 0
-            if (d.circles_ && !(d.circles_->empty()))
+        if (d.circles_ && !(d.circles_->empty()))
+        {
+            // draw circles
+            const auto& ci = *(d.circles_);
+            for (const auto& elm : ci)
             {
-                // draw circles
-                const auto& ci = *(d.circles_);
-                for (const auto& elm : ci)
-                {
-                    cv::Point center(cvRound(elm[0]), cvRound(elm[1]));
-                    int radius = cvRound(elm[2]);
-                    circle(*(d.frame_), center, 3, cv::Scalar(0, 255, 0), -1, 8, 0);
-                    // draw the circle outline
-                    circle(*(d.frame_), center, radius, cv::Scalar(0, 0, 255), 3, 8, 0);
-                }
+                cv::Point center(cvRound(elm[0]), cvRound(elm[1]));
+                int radius = cvRound(elm[2]);
+                circle(*(d.frame_), center, 3, cv::Scalar(0, 255, 0), -1, 8, 0);
+                // draw the circle outline
+                circle(*(d.frame_), center, radius, cv::Scalar(0, 0, 255), 3, 8, 0);
             }
-#endif
+        }
         if (d.squares_ && !(d.squares_->empty()))
         {
             const auto& sq = *(d.squares_);
@@ -122,6 +118,7 @@ private:
                 cv::rectangle(*(d.frame_), elm, cv::Scalar(0, 0, 255), 4);
             }
         }
+#endif
     }
 
     std::string get_time_captured(const opencv_frame_t& d)
@@ -185,7 +182,7 @@ private:
             double vmin = 0.0, vmax = 0.8;
             int vn = 9;
 
-            vector<double> params_values = { product_id, razmer, bort, cheezlok, cheezgot, cheezvnesh, cheezvnutr, kvadrvnesh, kvadrvnutr, cvetverh, cvetnijn };
+            std::vector<double> params_values = { product_id, razmer, bort, cheezlok, cheezgot, cheezvnesh, cheezvnutr, kvadrvnesh, kvadrvnutr, cvetverh, cvetnijn };
             vec_t::const_iterator res_first = res.begin();
             vec_t::const_iterator res_last = res.begin();
 
@@ -369,7 +366,7 @@ private:
     }
 
     // Convert OpenCV image/Mat into tiny-dnn vec_t with 3 channels. Supports color image only
-    vec_t Mat2vec_t(Mat image, int padding = 0, int H = 1024, int W = 768)
+    vec_t Mat2vec_t(cv::Mat image, int padding = 0, int H = 1024, int W = 768)
     {
         if (image.channels() != 3)
         {
@@ -419,7 +416,7 @@ private:
     soci::session sql_;
     std::uniform_int_distribution<int> di_;
     std::default_random_engine dre_;
-    network<sequential> nn;
+    tiny_dnn::network<tiny_dnn::sequential> nn;
 };
 
 #endif // JPEG_WRITTER_SQL_HPP__

@@ -95,7 +95,6 @@ set(HDR_FILES
     include/algo/od_interface.hpp
     include/algo/hough_circles.hpp
     include/algo/hog_dlib.hpp
-    include/pipe/filter.hpp
     include/pipe/pipeline.hpp
     include/pipe/producer.hpp
     )
