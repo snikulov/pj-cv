@@ -31,7 +31,7 @@
 #include "opencv_frame.hpp"
 #include "algo/hough_circles.hpp"
 #include "algo/hog_dlib.hpp"
-//#include "jpeg_writter_ex.hpp"
+#include "jpeg_writter_ex.hpp"
 #include "jpeg_writter_sql.hpp"
 
 #include <opencv2/opencv.hpp>
