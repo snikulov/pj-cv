@@ -296,11 +296,17 @@ private:
                 res_first = res_last;
             }
 
+            itogo = razmer + bort + cheezlok + cheezgot
+                + cheezvnesh + cheezvnutr + kvadrvnesh
+                + kvadrvnutr + cvetverh + cvetnijn;
+            itogo = itogo / 10;
+
+            int rest_id = 1;
             // { product_id,   razmer,   bort,   cheezlok,   cheezgot, cheezvnesh, cheezvnutr, kvadrvnesh, kvadrvnutr, cvetverh, cvetnijn };
-            sql_ << "insert into pizzas(PRODUCT_ID, RESTAURANT_ID, CAPTURE_DT, DIAMETER, CHEESE, COLOR, COATING, WELL, EDGE, RES, VER, PARAMS, FILENAME)"
-                    "values(    :id,          1,           :cdt,         :razmer, :cheese, :color,  :coating,  :well,    :edge, :res,  :ver, :params, :fname)",
-                use(product_id), use(cdt), use(razmer), use(cheezlok), use(cheezgot), use(cheezvnesh), use(cheezvnutr), use(kvadrvnesh), use(cvetverh), use(ver), use(params), use(fname);
-            if (sql_.get_last_insert_id("pizzas", id))
+            sql_ << "insert into pizzas1(PRODUCT_ID, RESTAURANT_ID, CAPTURE_DT, RAZMER, BORT, CHEEZLOK, CHEEZGOT, CHEEZVNESH, CHEEZVNUTR, KVADRVNESH, KVADRVNUTR, CVETVERH, CVETNIJN, ITOGO, VER, PARAMS, FILENAME)"
+                    "values(    :id,          :rest_id,           :cdt,         :razmer, :bort, :cheezlok,  :cheezegot,  :cheezvnesh,    :cheezvnutr, :kvadrvnesh, :kvadrvnutr, :cvetverh, :cvetnijn, :itogo, :ver, :params, :fname)",
+                use(product_id), use(rest_id), use(cdt), use(razmer), use(bort), use(cheezlok), use(cheezgot), use(cheezvnesh), use(cheezvnutr), use(kvadrvnesh), use(kvadrvnutr), use(cvetverh), use(cvetnijn), use(itogo), use(ver), use(params), use(fname);
+            if (sql_.get_last_insert_id("pizzas1", id))
             {
                 sql_ << "insert into photos(id, capture_dt, filename, photo_src)"
                         "values( :id, :cdt, :fname, :jpeg_data)",
