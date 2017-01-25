@@ -303,19 +303,19 @@ private:
 
             int rest_id = 1;
             LOG4CPLUS_INFO(lg_, "product_id " << product_id
-                   " rest_id " << rest_id
-                   " cdt " << cdt
-                   " razmer " << razmer
-                   " bort " << bort
-                   " cheezlok " << cheezlok
-                   " cheezgot " << cheezgot
-                   " cheezvnesh " << cheezvnesh
-                   " cheezvnutr " << cheezvnutr
-                   " kvadrvnesh " << kvadrvnesh
-                   " kvadrvnutr " << kvadrvnutr
-                   " cvetverh " << cvetverh
-                   " cvetnijn " << cvetnijn
-                   " itogo "    << itogo);
+                   << " rest_id " << rest_id
+                   << " cdt " << cdt
+                   << " razmer " << razmer
+                   << " bort " << bort
+                   << " cheezlok " << cheezlok
+                   << " cheezgot " << cheezgot
+                   << " cheezvnesh " << cheezvnesh
+                   << " cheezvnutr " << cheezvnutr
+                   << " kvadrvnesh " << kvadrvnesh
+                   << " kvadrvnutr " << kvadrvnutr
+                   << " cvetverh " << cvetverh
+                   << " cvetnijn " << cvetnijn
+                   << " itogo "    << itogo);
 
             // { product_id,   razmer,   bort,   cheezlok,   cheezgot, cheezvnesh, cheezvnutr, kvadrvnesh, kvadrvnutr, cvetverh, cvetnijn };
             sql_ << "insert into pizzas1(PRODUCT_ID, RESTAURANT_ID, CAPTURE_DT, RAZMER, BORT, CHEEZLOK, CHEEZGOT, CHEEZVNESH, CHEEZVNUTR, KVADRVNESH, KVADRVNUTR, CVETVERH, CVETNIJN, ITOGO, VER, PARAMS, FILENAME)"
