@@ -319,7 +319,7 @@ private:
 
             // { product_id,   razmer,   bort,   cheezlok,   cheezgot, cheezvnesh, cheezvnutr, kvadrvnesh, kvadrvnutr, cvetverh, cvetnijn };
             sql_ << "insert into pizzas1(PRODUCT_ID, RESTAURANT_ID, CAPTURE_DT, RAZMER, BORT, CHEEZLOK, CHEEZGOT, CHEEZVNESH, CHEEZVNUTR, KVADRVNESH, KVADRVNUTR, CVETVERH, CVETNIJN, ITOGO, VER, PARAMS, FILENAME)"
-                    "values(    :id,          :rest_id,           :cdt,         :razmer, :bort, :cheezlok,  :cheezegot,  :cheezvnesh,    :cheezvnutr, :kvadrvnesh, :kvadrvnutr, :cvetverh, :cvetnijn, :itogo, :ver, :params, :fname)",
+                    "values(    :product_id,          :rest_id,           :cdt,         :razmer, :bort, :cheezlok,  :cheezegot,  :cheezvnesh,    :cheezvnutr, :kvadrvnesh, :kvadrvnutr, :cvetverh, :cvetnijn, :itogo, :ver, :params, :fname)",
                 use(product_id), use(rest_id), use(cdt), use(razmer), use(bort), use(cheezlok), use(cheezgot), use(cheezvnesh), use(cheezvnutr), use(kvadrvnesh), use(kvadrvnutr), use(cvetverh), use(cvetnijn), use(itogo), use(ver), use(params), use(fname);
             if (sql_.get_last_insert_id("pizzas1", id))
             {
