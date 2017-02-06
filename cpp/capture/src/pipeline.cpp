@@ -25,32 +25,30 @@
 ///	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-#include "pipe/pipeline.hpp"
-#include "pipe/producer.hpp"
-#include "opencv_frame.hpp"
-#include "algo/hough_circles.hpp"
-#include "algo/hog_dlib.hpp"
-//#include "jpeg_writter_ex.hpp"
-#include "jpeg_writter_sql.hpp"
-
-#include <opencv2/opencv.hpp>
 #include <boost/application.hpp>
-#include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/program_options.hpp>
+#include <opencv2/opencv.hpp>
 
+#include <log4cplus/configurator.h>
+#include <log4cplus/fileappender.h>
 #include <log4cplus/logger.h>
 #include <log4cplus/loggingmacros.h>
-#include <log4cplus/fileappender.h>
 #include <log4cplus/loglevel.h>
-#include <log4cplus/configurator.h>
+
+#include "algo/hog_dlib.hpp"
+#include "algo/hough_circles.hpp"
+#include "jpeg_writter_ex.hpp"
+#include "jpeg_writter_sql.hpp"
+#include "opencv_frame.hpp"
+#include "pipe/pipeline.hpp"
+#include "pipe/producer.hpp"
 
 namespace app = boost::application;
 namespace fs = boost::filesystem;
 
 using namespace log4cplus;
 using namespace log4cplus::helpers;
-
 
 class ocv_cam
 {
@@ -93,7 +91,7 @@ public:
                 }
                 else
                 {
-                    err_count_    = 0;
+                    err_count_ = 0;
                     frames_count_ = 0;
                     LOG4CPLUS_INFO(clog_, "Re-opened capture...");
                 }
@@ -105,7 +103,8 @@ public:
             err_count_ = 0;
             frames_count_++;
 
-            if (!(frames_count_ % 25)) {
+            if (!(frames_count_ % 25))
+            {
                 auto diff = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - start_time_);
                 auto cnt = diff.count();
                 if (cnt > 0 && !(cnt % 5))
@@ -115,7 +114,7 @@ public:
             }
         }
         // will rate-limit output from 25->5
-        if(!(call_count_%5))
+        if (!(call_count_ % 5))
         {
             return frame;
         }
@@ -123,7 +122,6 @@ public:
     }
 
 private:
-
     void update_fps()
     {
         //using namespace std::chrono_literals;
@@ -184,8 +182,7 @@ public:
         {
             auto cam = std::make_shared<ocv_cam>(url);
 
-            auto is_stopped = [&]()->bool
-            {
+            auto is_stopped = [&]() -> bool {
                 return (ctx_.find<app::status>())->state() == app::status::stopped;
             };
 
@@ -241,7 +238,6 @@ static void init_logger()
         std::cerr << ex.what() << std::endl;
         exit(0);
     }
-
 }
 
 int main(int argc, char** argv)
