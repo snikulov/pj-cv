@@ -1,27 +1,54 @@
-#include "pipe/pipeline.hpp"
-#include "pipe/producer.hpp"
-#include "opencv_frame.hpp"
-#include "algo/hough_circles.hpp"
-#include "algo/hog_dlib.hpp"
-#include "jpeg_writter_ex.hpp"
+////////////////////////////////////////////////////////////////////////////////////////////////
+///	Copyright (C) 2016-2017, Sergei Nikulov (sergey.nikulov@gmail.com)
+///	All rights reserved.
+///
+///	Redistribution and use in source and binary forms, with or without
+///	modification, are permitted provided that the following conditions are met:
+///	* Redistributions of source code must retain the above copyright
+///	notice, this list of conditions and the following disclaimer.
+///	* Redistributions in binary form must reproduce the above copyright
+///	notice, this list of conditions and the following disclaimer in the
+///	documentation and/or other materials provided with the distribution.
+///	* Neither the name of the <organization> nor the
+///	names of its contributors may be used to endorse or promote products
+///	derived from this software without specific prior written permission.
+///
+///	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
+///	EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+///	WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+///	DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY
+///	DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+///	(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+///	LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+///	ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+///	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+///	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include <opencv2/opencv.hpp>
 #include <boost/application.hpp>
-#include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/program_options.hpp>
+#include <opencv2/opencv.hpp>
 
+#include <log4cplus/configurator.h>
+#include <log4cplus/fileappender.h>
 #include <log4cplus/logger.h>
 #include <log4cplus/loggingmacros.h>
-#include <log4cplus/fileappender.h>
 #include <log4cplus/loglevel.h>
-#include <log4cplus/configurator.h>
+
+#include "algo/hog_dlib.hpp"
+#include "algo/hough_circles.hpp"
+#include "jpeg_writter_ex.hpp"
+#include "jpeg_writter_sql.hpp"
+#include "opencv_frame.hpp"
+#include "pipe/pipeline.hpp"
+#include "pipe/producer.hpp"
 
 namespace app = boost::application;
 namespace fs = boost::filesystem;
 
 using namespace log4cplus;
 using namespace log4cplus::helpers;
-
 
 class ocv_cam
 {
@@ -64,7 +91,7 @@ public:
                 }
                 else
                 {
-                    err_count_    = 0;
+                    err_count_ = 0;
                     frames_count_ = 0;
                     LOG4CPLUS_INFO(clog_, "Re-opened capture...");
                 }
@@ -76,7 +103,8 @@ public:
             err_count_ = 0;
             frames_count_++;
 
-            if (!(frames_count_ % 25)) {
+            if (!(frames_count_ % 25))
+            {
                 auto diff = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - start_time_);
                 auto cnt = diff.count();
                 if (cnt > 0 && !(cnt % 5))
@@ -86,7 +114,7 @@ public:
             }
         }
         // will rate-limit output from 25->5
-        if(!(call_count_%5))
+        if (!(call_count_ % 5))
         {
             return frame;
         }
@@ -94,7 +122,6 @@ public:
     }
 
 private:
-
     void update_fps()
     {
         //using namespace std::chrono_literals;
@@ -129,45 +156,68 @@ public:
         : ctx_(ctx)
     {
     }
+
     int operator()()
     {
-        std::string url{ "rtsp://admin:admin@212.45.31.140:554/h264" };
-        auto cam = std::make_shared<ocv_cam>(url);
-        auto is_stopped = [&]()->bool
-        {
-            return (ctx_.find<app::status>())->state() == app::status::stopped;
-        };
+        auto ctxarg = ctx_.find<app::args>();
+        namespace po = boost::program_options;
 
-        auto frame_not_null = [](const opencv_frame_t& data) -> bool {
-            return data.frame_ && (!data.frame_->empty());
-        };
-
-        pipeline<std::shared_ptr<filter<opencv_frame_t> > , opencv_frame_t> pipe;
-        auto prod = std::make_shared<producer<opencv_frame_t> >(std::ref(*cam), frame_not_null, is_stopped);
-        pipe.add_filter(prod);
-
-        auto circles_found = [frame_not_null](const opencv_frame_t& data) -> bool {
-            return frame_not_null(data) && data.circles_ && (!data.circles_->empty());
-        };
-
-        auto circ = std::make_shared<hough_circles>();
-        auto step1 = std::make_shared<transformer<opencv_frame_t> >(std::ref(*circ), circles_found, is_stopped);
-        pipe.add_filter(step1);
-
+        std::string url = "rtsp://admin:admin@212.45.31.140:554/h264";
+        std::string dst = "192.168.9.233";
         std::string svmpath = "tr2_80x80.svm";
-        auto h = std::make_shared<hog>(svmpath);
-        auto step2 = std::make_shared<transformer<opencv_frame_t> >(std::ref(*h), circles_found, is_stopped);
-        pipe.add_filter(step2);
 
-        std::string imgpath = "images";
-        auto jw = std::make_shared<jpeg_writter_ex>(imgpath);
-        auto step3 = std::make_shared<sink<opencv_frame_t> >(std::ref(*jw), is_stopped);
-        pipe.add_filter(step3);
+        po::options_description desc{ "Options" };
+        // clang-format off
+        desc.add_options()
+            ("help,h", "Help")
+            ("url,u", po::value<std::string>(&url)->default_value("rtsp://admin:admin@212.45.31.140:554/h264"), "camera url")
+            ("out,o", po::value<std::string>(&dst)->default_value("192.168.9.233"), "db server ip")
+            ("svmpath,s", po::value<std::string>(&svmpath)->default_value("tr2_80x80.svm"), "path to obj detector svm");
+        // clang-format on
+        po::variables_map vm;
+        po::store(po::parse_command_line(ctxarg->argc(), ctxarg->argv(), desc), vm);
+        po::notify(vm);
 
-        pipe.run();
+        if (!vm.count("help"))
+        {
+            auto cam = std::make_shared<ocv_cam>(url);
 
-        ctx_.find<app::wait_for_termination_request>()->wait();
+            auto is_stopped = [&]() -> bool {
+                return (ctx_.find<app::status>())->state() == app::status::stopped;
+            };
 
+            auto frame_not_null = [](const opencv_frame_t& data) -> bool {
+                return data.frame_ && (!data.frame_->empty());
+            };
+
+            pipeline<std::shared_ptr<filter<opencv_frame_t> >, opencv_frame_t> pipe;
+            auto prod = std::make_shared<producer<opencv_frame_t> >(std::ref(*cam), frame_not_null, is_stopped);
+            pipe.add_filter(prod);
+
+            auto circles_found = [frame_not_null](const opencv_frame_t& data) -> bool {
+                return frame_not_null(data) && data.circles_ && (!data.circles_->empty());
+            };
+
+            auto circ = std::make_shared<hough_circles>();
+            auto step1 = std::make_shared<transformer<opencv_frame_t> >(std::ref(*circ), circles_found, is_stopped);
+            pipe.add_filter(step1);
+
+            auto h = std::make_shared<hog>(svmpath);
+            auto step2 = std::make_shared<transformer<opencv_frame_t> >(std::ref(*h), circles_found, is_stopped);
+            pipe.add_filter(step2);
+
+            auto jw = std::make_shared<jpeg_writter_sql>(dst);
+            auto step3 = std::make_shared<sink<opencv_frame_t> >(std::ref(*jw), is_stopped);
+            pipe.add_filter(step3);
+
+            pipe.run();
+
+            ctx_.find<app::wait_for_termination_request>()->wait();
+        }
+        else
+        {
+            std::cout << desc << "\n";
+        }
         return 0;
     }
 
@@ -188,7 +238,6 @@ static void init_logger()
         std::cerr << ex.what() << std::endl;
         exit(0);
     }
-
 }
 
 int main(int argc, char** argv)
