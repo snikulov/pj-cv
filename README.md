@@ -12,6 +12,8 @@ Repository for side project for PJ CV Quality control.
 * FFMPEG for H.264 capture from IP Camera (https://github.com/FFmpeg/FFmpeg.git, for Windows use prebuilt binaries here https://ffmpeg.zeranoe.com/builds/)
 * Boost C++ Libraries (1.60 or greater http://www.boost.org/users/download/)
 * OpenCV C++ Libraries (3.1 https://github.com/opencv/opencv.git)
+* DLIB C++ Libraries (http://dlib.net/)
+* tiny-dnn CNN deep learning library (https://github.com/tiny-dnn/tiny-dnn)
 * C++ compiler which is support C++11 standard (Windows - MSVS Community 2015+, MinGW GCC 4.8+, Linux GCC 4.8+)
 * CMake 3.1+
 
