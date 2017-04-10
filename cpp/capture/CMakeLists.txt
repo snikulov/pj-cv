@@ -61,9 +61,13 @@ else()
 ExtProjectGit("https://github.com/log4cplus/log4cplus.git" "REL_1_2_0" ${DEPS_ROOT}
     CMAKE_ARGS -DBUILD_SHARED_LIBS=ON -DUNICODE=OFF -DLOG4CPLUS_BUILD_LOGGINGSERVER=OFF -DLOG4CPLUS_BUILD_TESTING=OFF)
 endif()
+
 ExtProjectGit("https://github.com/snikulov/soci.git" "soci_mysql" ${DEPS_ROOT}
     CMAKE_ARGS -DSOCI_DB2=OFF -DSOCI_EMPTY=OFF -DSOCI_FIREBIRD=OFF -DSOCI_MYSQL=ON -DSOCI_ODBC=OFF -DSOCI_ORACLE=OFF -DSOCI_POSTGRESQL=OFF -DSOCI_SQLITE3=OFF)
-ExtProjectGit("https://github.com/snikulov/tiny-dnn.git" "install_fix" ${DEPS_ROOT} CMAKE_ARGS -DTBB_FIND_REQUIRED=OFF)
+ExtProjectGit("https://github.com/snikulov/tiny-dnn.git" "install_fix" ${DEPS_ROOT}
+    CMAKE_ARGS -DTBB_FIND_REQUIRED=OFF)
+ExtProjectGit("https://github.com/davisking/dlib.git" "v19.4" ${DEPS_ROOT}
+    CMAKE_ARGS -DDLIB_JPEG_SUPPORT=ON -DUSE_AVX_INSTRUCTIONS=ON)
 
 include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(${Boost_INCLUDE_DIRS})
@@ -102,20 +106,9 @@ set(SRC_FILES
     src/algorithm_factory.cpp
     src/main.cpp)
 
-# DLIB inclusion
-set(DLIB_JPEG_SUPPORT ON)
-set(USE_AVX_INSTRUCTIONS ON)
-add_subdirectory(ext/dlib)
-
-#set(LOG4CPLUS_BUILD_TESTING OFF)
-#set(LOG4CPLUS_BUILD_LOGGINGSERVER OFF)
-#set(UNICODE OFF)
-#set(LOG4CPLUS_HAVE_CXX11_SUPPORT ON)
-#add_subdirectory(ext/log4cplus)
-
 add_executable(pipeline src/pipeline.cpp)
-add_dependencies(pipeline log4cplus.git soci.git tiny-dnn.git)
-target_include_directories(pipeline PUBLIC ext/dlib)
+add_dependencies(pipeline log4cplus.git soci.git tiny-dnn.git dlib.git)
+
 target_link_libraries(pipeline
     ${OpenCV_LIBS}
     dlib
@@ -135,7 +128,6 @@ endif()
 
 add_executable(${PROJECT_NAME} ${HDR_FILES} ${SRC_FILES})
 add_dependencies(${PROJECT_NAME} log4cplus.git)
-target_include_directories(${PROJECT_NAME} PUBLIC ext/dlib)
 target_link_libraries(${PROJECT_NAME}
     ${OpenCV_LIBS}
     dlib
