@@ -10,9 +10,6 @@
 [submodule "cpp/train-hog"]
 	path = cpp/train-hog
 	url = https://github.com/snikulov/trainHOG.git
-[submodule "cpp/capture/ext/dlib"]
-	path = cpp/capture/ext/dlib
-	url = https://github.com/snikulov/dlib.git
 [submodule "cpp/capture/cmake"]
 	path = cpp/capture/cmake
 	url = https://github.com/snikulov/cmake-modules.git
