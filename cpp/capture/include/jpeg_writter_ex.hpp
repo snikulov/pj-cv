@@ -75,7 +75,7 @@ public:
         {
             if (d.squares_ && !(d.squares_->empty()))
             {
-                draw_objects(d);
+                // draw_objects(d);
                 // detected image
                 std::string fname = get_fname(d);
                 if (write_image(d, fname))

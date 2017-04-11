@@ -50,8 +50,7 @@ namespace fs = boost::filesystem;
 using namespace log4cplus;
 using namespace log4cplus::helpers;
 
-class ocv_cam
-{
+class ocv_cam {
 public:
     ocv_cam(std::string& url)
         : url_(url)
@@ -63,8 +62,7 @@ public:
         , start_time_(std::chrono::high_resolution_clock::now())
         , fps_(0.0)
     {
-        if (!cap_->open(url_))
-        {
+        if (!cap_->open(url_)) {
             LOG4CPLUS_FATAL(clog_, "Unable to open " << url_);
             throw std::runtime_error("Unable to open " + url_);
         }
@@ -77,45 +75,35 @@ public:
         call_count_++;
         // take each 10 frame
         frame.frame_ = std::make_shared<cv::Mat>();
-        if (!cap_->read(*(frame.frame_)))
-        {
+        if (!cap_->read(*(frame.frame_))) {
             err_count_++;
-            if (err_count_ > 10)
-            {
+            if (err_count_ > 10) {
                 LOG4CPLUS_WARN(clog_, "Number of empty frames " << err_count_ << ". Try re-open");
                 cap_.reset(new cv::VideoCapture());
-                if (!cap_->open(url_))
-                {
+                if (!cap_->open(url_)) {
                     LOG4CPLUS_FATAL(clog_, "Unable to re-open " << url_ << " after " << err_count_ << " retries");
                     throw std::runtime_error("Unable to open " + url_);
-                }
-                else
-                {
+                } else {
                     err_count_ = 0;
                     frames_count_ = 0;
                     LOG4CPLUS_INFO(clog_, "Re-opened capture...");
                 }
             }
-        }
-        else
-        {
+        } else {
             frame.time_captured_ = std::chrono::system_clock::now();
             err_count_ = 0;
             frames_count_++;
 
-            if (!(frames_count_ % 25))
-            {
+            if (!(frames_count_ % 25)) {
                 auto diff = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - start_time_);
                 auto cnt = diff.count();
-                if (cnt > 0 && !(cnt % 5))
-                {
+                if (cnt > 0 && !(cnt % 5)) {
                     LOG4CPLUS_INFO(clog_, "frames received: " << frames_count_);
                 }
             }
         }
         // will rate-limit output from 25->5
-        if (!(call_count_ % 5))
-        {
+        if (!(call_count_ % 5)) {
             return frame;
         }
         return opencv_frame_t{};
@@ -129,8 +117,7 @@ private:
         auto diff = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - start_time_);
 
         const auto CINTERVAL = std::chrono::seconds(2);
-        if (diff > CINTERVAL)
-        {
+        if (diff > CINTERVAL) {
             fps_ = frames_count_ / diff.count();
         }
     }
@@ -149,8 +136,7 @@ private:
     double fps_;
 };
 
-class worker
-{
+class worker {
 public:
     explicit worker(app::context& ctx)
         : ctx_(ctx)
@@ -159,12 +145,15 @@ public:
 
     int operator()()
     {
+        auto lg = Logger::getInstance("main");
+
         auto ctxarg = ctx_.find<app::args>();
         namespace po = boost::program_options;
 
         std::string url = "rtsp://admin:admin@212.45.31.140:554/h264";
         std::string dst = "192.168.9.233";
         std::string svmpath = "tr2_80x80.svm";
+        bool to_file = false;
 
         po::options_description desc{ "Options" };
         // clang-format off
@@ -172,14 +161,14 @@ public:
             ("help,h", "Help")
             ("url,u", po::value<std::string>(&url)->default_value("rtsp://admin:admin@212.45.31.140:554/h264"), "camera url")
             ("out,o", po::value<std::string>(&dst)->default_value("192.168.9.233"), "db server ip")
+            ("file,f", po::value<bool>(&to_file)->default_value(false), "use filesystem as storage")
             ("svmpath,s", po::value<std::string>(&svmpath)->default_value("tr2_80x80.svm"), "path to obj detector svm");
         // clang-format on
         po::variables_map vm;
         po::store(po::parse_command_line(ctxarg->argc(), ctxarg->argv(), desc), vm);
         po::notify(vm);
 
-        if (!vm.count("help"))
-        {
+        if (!vm.count("help")) {
             auto cam = std::make_shared<ocv_cam>(url);
 
             auto is_stopped = [&]() -> bool {
@@ -206,16 +195,24 @@ public:
             auto step2 = std::make_shared<transformer<opencv_frame_t> >(std::ref(*h), circles_found, is_stopped);
             pipe.add_filter(step2);
 
-            auto jw = std::make_shared<jpeg_writter_sql>(dst);
-            auto step3 = std::make_shared<sink<opencv_frame_t> >(std::ref(*jw), is_stopped);
-            pipe.add_filter(step3);
+
+            if (to_file) {
+                LOG4CPLUS_INFO(lg, "Using filesystem for jpeg files...");
+                auto jwf = std::make_shared<jpeg_writter_ex>("image_ex");
+                auto step3f = std::make_shared<sink<opencv_frame_t> >(std::ref(*jwf), is_stopped);
+                pipe.add_filter(step3f);
+            } else {
+                LOG4CPLUS_INFO(lg, "Using Database for jpeg files...");
+                auto jwsql = std::make_shared<jpeg_writter_sql>(dst);
+                auto step3s = std::make_shared<sink<opencv_frame_t> >(std::ref(*jwsql), is_stopped);
+                pipe.add_filter(step3s);
+            }
+
 
             pipe.run();
 
             ctx_.find<app::wait_for_termination_request>()->wait();
-        }
-        else
-        {
+        } else {
             std::cout << desc << "\n";
         }
         return 0;
@@ -229,12 +226,9 @@ static void init_logger()
 {
     using namespace log4cplus;
     using namespace log4cplus::helpers;
-    try
-    {
+    try {
         PropertyConfigurator::doConfigure("log4cplus.properties");
-    }
-    catch (const std::exception& ex)
-    {
+    } catch (const std::exception& ex) {
         std::cerr << ex.what() << std::endl;
         exit(0);
     }
